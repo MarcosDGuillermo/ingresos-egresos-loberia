@@ -1,0 +1,2940 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingresos · Cereales Lobería</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#201D18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ing/Egr Lobería">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EDEAE2;
+    --panel: #FBFAF7;
+    --panel-2: #F3F0E9;
+    --ink: #201D18;
+    --ink-soft: #625C50;
+    --line: #DEDACF;
+    --gold: #B8862F;
+    --gold-soft: #EFDFB8;
+    --steel: #33565F;
+    --steel-soft: #D7E4E6;
+    --rust: #B4502E;
+    --rust-soft: #F0DACC;
+    --purga: #8B5FBF;
+    --purga-soft: #E9DEF5;
+    --green: #3E6B3E;
+    --green-soft: #DCE8DA;
+    --amber: #C68A1E;
+    --amber-soft: #F3E2BC;
+    --violet: #6E5590;
+    --violet-soft: #E4DDEE;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(32,29,24,.06), 0 6px 20px -8px rgba(32,29,24,.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  /* ---------- Top bar ---------- */
+  header.topbar{
+    background: var(--ink);
+    color: #F3F0E9;
+    padding: 18px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand-logo{
+    height:36px;
+    width:36px;
+    border-radius:8px;
+    object-fit:cover;
+    flex-shrink:0;
+  }
+  .brand .mark{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:20px;
+    letter-spacing:.2px;
+  }
+  .brand .sub{
+    font-size:12.5px;
+    color:#B8B2A4;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .topbar-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .date-chip{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    color:#D9D4C6;
+    border:1px solid #4A4438;
+    padding:6px 10px;
+    border-radius:999px;
+  }
+  .btn-primary{
+    background: var(--gold);
+    color:#211804;
+    border:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:11px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition: transform .12s ease, background .15s ease;
+  }
+  .btn-primary:hover{ background:#CB9636; transform: translateY(-1px); }
+  .btn-primary:active{ transform: translateY(0); }
+
+  .btn-ghost-dark{
+    background:transparent;
+    border:1px solid #4A4438;
+    color:#D9D4C6;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    padding:9px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .btn-ghost-dark:hover{ background:#3A362D; color:#fff; }
+
+  .modo-toggle{
+    display:flex;
+    gap:3px;
+    background:#2A2620;
+    border-radius:9px;
+    padding:3px;
+  }
+  .modo-btn{
+    background:transparent;
+    border:none;
+    color:#B8B2A4;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    padding:7px 13px;
+    border-radius:6px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .modo-btn.active{ background: var(--gold); color:#211804; }
+
+  .egreso-heading{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:15px;
+    font-weight:700;
+    color: var(--ink);
+    margin: 0 0 12px;
+  }
+
+  .cupo-dia-header{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    font-weight:600;
+    color: var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin: 18px 0 8px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .cupo-dia-header:first-child{ margin-top:0; }
+  .cupo-cereal-group{
+    margin-bottom:10px;
+  }
+  .cupo-cereal-label{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:6px;
+    margin-bottom:6px;
+  }
+  .cupo-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 14px;
+    margin-bottom:6px;
+  }
+  .cupo-row-main{
+    flex:1;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    min-width:0;
+  }
+  .cupo-cliente{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+  }
+  .cupo-detalle{
+    font-size:12px;
+    color: var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .cupo-codigo{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Plant tabs ---------- */
+  .toolbar{
+    max-width:1180px;
+    margin: 22px auto 0;
+    padding: 0 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    background: var(--panel-2);
+    border:1px solid var(--line);
+    padding:4px;
+    border-radius:10px;
+  }
+  .tab{
+    border:none;
+    background:transparent;
+    padding:9px 16px;
+    border-radius:7px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    color: var(--ink-soft);
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .tab.active{
+    background: var(--ink);
+    color:#F3F0E9;
+  }
+  .counts{
+    display:flex;
+    gap:10px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color: var(--ink-soft);
+  }
+  .count-pill{
+    background: var(--panel);
+    border:1px solid var(--line);
+    padding:5px 10px;
+    border-radius:999px;
+  }
+
+  .filters-row{
+    margin-top:10px;
+  }
+  .filters-row .tabs{
+    background: transparent;
+    border:none;
+    padding:0;
+    gap:4px;
+  }
+  .filters-row .tab{
+    font-size:12px;
+    padding:6px 12px;
+    background: var(--panel);
+    border:1px solid var(--line);
+  }
+  .filters-row .tab.active{
+    background: var(--steel);
+    color:#fff;
+    border-color: var(--steel);
+  }
+  .search-input{
+    flex:1;
+    min-width:200px;
+    max-width:280px;
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background: var(--panel);
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    color: var(--ink);
+  }
+  .search-input:focus{
+    outline:2px solid var(--gold);
+    outline-offset:1px;
+  }
+
+  /* ---------- Board ---------- */
+  main{
+    max-width:1180px;
+    margin: 18px auto 60px;
+    padding: 0 24px;
+  }
+  .empty-state{
+    background: var(--panel);
+    border:1px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align:center;
+    color: var(--ink-soft);
+  }
+
+  .card{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap: 16px;
+    flex-wrap:wrap;
+  }
+  .card-title{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+  }
+  .card-title .cliente{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:16.5px;
+  }
+  .card-title .campo{
+    font-size:13px;
+    color: var(--ink-soft);
+  }
+  .plant-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .plant-monaco{ background: var(--steel-soft); color: var(--steel); }
+  .plant-virgen{ background: var(--gold-soft); color:#7A5A17; }
+
+  .cereal-badge{
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space:nowrap;
+  }
+  .cereal-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+  }
+
+  .queue-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:26px;
+    height:26px;
+    padding:0 6px;
+    border-radius:50%;
+    background: var(--ink);
+    color:#F3F0E9;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:12px;
+    flex-shrink:0;
+  }
+
+  .drag-handle{
+    cursor: grab;
+    color: var(--ink-soft);
+    font-size:16px;
+    line-height:1;
+    padding: 0 2px;
+    flex-shrink:0;
+    user-select:none;
+  }
+  .drag-handle:active{ cursor: grabbing; }
+  .queue-draggable{ transition: opacity .15s ease; }
+  .queue-draggable.dragging{ opacity: 0.4; }
+  .queue-draggable.drag-over{ box-shadow: 0 0 0 2px var(--gold) inset; }
+
+  /* ---------- Vista compacta ---------- */
+  .compact-row{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    overflow:hidden;
+  }
+  .compact-summary{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding: 10px 14px;
+    cursor:pointer;
+    transition: background .1s ease;
+  }
+  .compact-summary:hover{ background: var(--panel-2); }
+  .compact-main{
+    flex:1;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    min-width:0;
+  }
+  .compact-cliente{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .compact-campo{
+    font-size:12px;
+    color: var(--ink-soft);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .compact-chofer{
+    font-size:12px;
+    color: var(--steel);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    padding-left:10px;
+    border-left:1px solid var(--line);
+  }
+  .compact-etapa{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    color: var(--ink-soft);
+    white-space:nowrap;
+  }
+  .compact-humedad{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    color: var(--violet);
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .compact-caret{
+    font-size:10px;
+    color: var(--ink-soft);
+    width:14px;
+    text-align:center;
+  }
+  .compact-detalle{
+    padding: 4px 16px 16px;
+    border-top:1px solid var(--line);
+  }
+  .compact-detalle .pipeline{ margin-top:14px; }
+
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 22px;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .meta-item .label{
+    display:block;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color: var(--ink-soft);
+    margin-bottom:2px;
+  }
+  .meta-item .value{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  /* ---------- Pipeline ---------- */
+  .pipeline{
+    margin-top:16px;
+    display:flex;
+    align-items:flex-start;
+  }
+  .stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    position:relative;
+    flex:1;
+  }
+  .stage .dot{
+    width:15px; height:15px;
+    border-radius:50%;
+    background: var(--panel-2);
+    border:2px solid var(--line);
+    z-index:2;
+    transition: all .15s ease;
+  }
+  .stage .lbl{
+    font-size:10.5px;
+    font-family:'JetBrains Mono', monospace;
+    color: var(--ink-soft);
+    text-align:center;
+  }
+  .stage .time{
+    font-size:9.5px;
+    color:#9A9384;
+    min-height:12px;
+  }
+  .stage::before{
+    content:"";
+    position:absolute;
+    top:6px;
+    left:-50%;
+    width:100%;
+    height:2px;
+    background: var(--line);
+    z-index:1;
+  }
+  .stage:first-child::before{ display:none; }
+
+  .stage.done .dot{ background: var(--green); border-color: var(--green); }
+  .stage.done::before{ background: var(--green); }
+  .stage.current::before{ background: var(--green); }
+  .stage.current .dot{
+    background: var(--color-etapa, var(--amber));
+    border-color: var(--color-etapa, var(--amber));
+    box-shadow: 0 0 0 4px var(--color-etapa-soft, var(--amber-soft));
+  }
+  .stage.current .lbl{ color: var(--color-etapa, var(--ink)); font-weight:600; }
+
+  .parcial-note{
+    margin-top:12px;
+    font-size:12.5px;
+    background: var(--violet-soft);
+    color: var(--violet);
+    border-radius:7px;
+    padding:8px 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .egreso-ruta{
+    margin-top:14px;
+    background: var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .egreso-ruta-item{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .egreso-ruta-label{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color: var(--ink-soft);
+    font-weight:600;
+  }
+  .egreso-ruta-valor{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color: var(--ink);
+  }
+  .egreso-ruta-flecha{
+    font-size:18px;
+    color: var(--ink-soft);
+    margin-top:12px;
+  }
+  .egreso-ruta-origen{
+    margin-left:auto;
+    font-size:12px;
+    font-weight:700;
+    padding:6px 12px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .egreso-ruta-origen.acopio{ background: var(--steel-soft); color: var(--steel); }
+  .egreso-ruta-origen.campo{ background: var(--green-soft); color: var(--green); }
+
+  .card-actions{
+    margin-top:16px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  .btn-ghost{
+    background: var(--panel-2);
+    border:1px solid var(--line);
+    color: var(--ink);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    padding:8px 13px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .btn-ghost:hover{ background: var(--gold-soft); border-color: var(--gold); }
+  .btn-ghost.advance{ background: var(--ink); color:#F3F0E9; border-color:var(--ink); }
+  .btn-ghost.advance:hover{ background:#3A362D; }
+  .btn-ghost.finish{ background: var(--green); color:#fff; border-color:var(--green); }
+  .btn-ghost.finish:hover{ background:#345C34; }
+  .btn-ghost.link{ background:transparent; border-color:transparent; text-decoration:underline; color: var(--ink-soft); }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background: rgba(32,29,24,.45);
+    align-items:flex-start;
+    justify-content:center;
+    padding: 40px 16px;
+    overflow-y:auto;
+    z-index: 50;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    background: var(--panel);
+    border-radius: 14px;
+    width:100%;
+    max-width: 560px;
+    padding: 26px 26px 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  .modal h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:19px;
+    margin: 0 0 4px;
+  }
+  .modal .hint{
+    font-size:12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+  }
+  .form-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 14px;
+  }
+  .form-grid .full{ grid-column: 1 / -1; }
+  label{
+    font-size:11.5px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color: var(--ink-soft);
+    display:block;
+    margin-bottom:5px;
+  }
+  select, input[type=text], input[type=number]{
+    width:100%;
+    padding:9px 10px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background: var(--panel-2);
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    color: var(--ink);
+  }
+  select:focus, input:focus{
+    outline: 2px solid var(--gold);
+    outline-offset:1px;
+    background:#fff;
+  }
+  .autofill-note{
+    grid-column:1/-1;
+    font-size:12px;
+    color: var(--steel);
+    background: var(--steel-soft);
+    padding:8px 10px;
+    border-radius:7px;
+    display:none;
+  }
+  .autofill-note.show{ display:block; }
+  .chofer-nuevo-aviso{
+    margin-top:6px;
+    font-size:11.5px;
+    color:#8A5A17;
+    background: var(--amber-soft);
+    padding:6px 9px;
+    border-radius:6px;
+  }
+  .link-inline{
+    background:none;
+    border:none;
+    padding:0;
+    color:#8A5A17;
+    font-weight:700;
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:11.5px;
+    font-family:'Inter', sans-serif;
+  }
+  .modal-actions{
+    margin-top:20px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+  }
+  .btn-cancel{
+    background:transparent;
+    border:1px solid var(--line);
+    padding:10px 16px;
+    border-radius:8px;
+    font-family:'Inter';
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+    color: var(--ink-soft);
+  }
+
+  footer.foot{
+    text-align:center;
+    font-size:11.5px;
+    color:#9A9384;
+    font-family:'JetBrains Mono', monospace;
+    padding: 10px 24px 40px;
+  }
+
+  @media (max-width: 640px){
+    .form-grid{ grid-template-columns: 1fr; }
+    .pipeline{ overflow-x:auto; }
+    header.topbar{ padding: 16px; }
+  }
+
+  @media print{
+    body *{ visibility:hidden; }
+    #areaImprimible, #areaImprimible *{ visibility:visible; }
+    #areaImprimible{ position:absolute; top:0; left:0; width:100%; }
+    #tituloImpresion{ display:block !important; }
+    .cupo-row .btn-ghost{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="icons/icon-192.png" alt="Cereales Lobería" class="brand-logo" onerror="this.style.display='none'">
+    <span class="mark" id="modoTitulo">Ingresos</span>
+    <span class="sub">Cereales Lobería · Planta</span>
+    <div class="modo-toggle" id="modoAppTabs">
+      <button class="modo-btn active" data-modo="ingresos">📥 Ingresos</button>
+      <button class="modo-btn" data-modo="egresos">📤 Egresos</button>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="date-chip" id="todayChip"></span>
+    <button class="btn-ghost-dark" onclick="abrirBuscarTransporte()" title="Buscar y compartir datos de un transporte">🔍 Buscar transporte</button>
+    <span id="accionesIngresos">
+      <button class="btn-ghost-dark" onclick="openMantenimiento('ingresos')" title="Borrar ingresos finalizados viejos">🧹 Mantenimiento</button>
+      <button class="btn-primary" onclick="openModal()">＋ Nuevo ingreso</button>
+    </span>
+    <span id="accionesEgresos" style="display:none;">
+      <button class="btn-ghost-dark" onclick="openMantenimiento('egresos')" title="Borrar egresos finalizados viejos">🧹 Mantenimiento</button>
+      <button class="btn-ghost-dark" onclick="abrirNuevoCupo()">＋ Nuevo cupo</button>
+      <button class="btn-primary" onclick="abrirNuevoEgresoManual()">＋ Nuevo egreso</button>
+    </span>
+  </div>
+</header>
+
+<div id="seccionIngresos">
+<div class="toolbar">
+  <div class="tabs" id="plantTabs">
+    <button class="tab active" data-plant="Todas">Todas</button>
+    <button class="tab" data-plant="Mónaco">Planta Mónaco</button>
+    <button class="tab" data-plant="La Virgen">Planta La Virgen</button>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="tabs" id="vistaTabs">
+      <button class="tab active" data-vista="tarjetas" title="Vista tarjetas">▦ Tarjetas</button>
+      <button class="tab" data-vista="compacta" title="Vista compacta">☰ Compacta</button>
+    </div>
+    <div class="counts" id="counts"></div>
+  </div>
+</div>
+
+<div class="toolbar filters-row">
+  <select id="etapaFiltro" class="search-input" style="max-width:200px;" onchange="render()">
+    <option value="pendientes" selected>Pendientes (en proceso)</option>
+    <option value="todos">Todas las etapas</option>
+    <option value="0">Solo Anunciado</option>
+    <option value="1">Solo Arribo</option>
+    <option value="2">Solo Calado</option>
+    <option value="3">Solo Descargando</option>
+    <option value="4">Solo Finalizado</option>
+  </select>
+  <input type="text" id="buscador" class="search-input" placeholder="Buscar por cliente, campo o chofer…" oninput="render()">
+  <button id="btnSoloPurgados" class="btn-ghost" onclick="toggleSoloPurgados()" style="white-space:nowrap;">🔄 Solo purgados</button>
+</div>
+
+<div class="toolbar filters-row" id="cerealFiltroRow">
+  <div class="tabs" id="cerealTabs">
+    <button class="tab active cereal-chip" data-cereal="Todos">Todos</button>
+  </div>
+</div>
+
+<main id="board"></main>
+</div><!-- /seccionIngresos -->
+
+<div id="seccionEgresos" style="display:none;">
+  <div class="toolbar">
+    <div class="tabs" id="plantTabsEgreso">
+      <button class="tab active" data-plant="Todas">Todas</button>
+      <button class="tab" data-plant="Mónaco">Planta Mónaco</button>
+      <button class="tab" data-plant="La Virgen">Planta La Virgen</button>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="tabs" id="vistaTabsEgreso">
+        <button class="tab active" data-vista="tarjetas" title="Vista tarjetas">▦ Tarjetas</button>
+        <button class="tab" data-vista="compacta" title="Vista compacta">☰ Compacta</button>
+      </div>
+      <div class="counts" id="countsEgreso"></div>
+    </div>
+  </div>
+
+  <div class="toolbar filters-row">
+    <div class="tabs" id="origenTabs">
+      <button class="tab active" data-origen="Todos">Todos</button>
+      <button class="tab" data-origen="Acopio">🏭 Acopio</button>
+      <button class="tab" data-origen="Campo">🌾 Campo</button>
+    </div>
+    <input type="text" id="buscadorEgreso" class="search-input" placeholder="Buscar por cliente o chofer…" oninput="renderEgresos()">
+  </div>
+
+  <div class="toolbar filters-row">
+    <div class="tabs" id="subVistaEgresoTabs">
+      <button class="tab active" data-subvista="cupos">📋 Cupos</button>
+      <button class="tab" data-subvista="camiones">🚛 Camiones cargando</button>
+      <button class="tab" data-subvista="finalizados">✅ Camiones cargados</button>
+    </div>
+  </div>
+
+  <div class="toolbar filters-row">
+    <select id="corredorFiltro" class="search-input" style="max-width:180px;" onchange="renderEgresos()">
+      <option value="Todos">Todos los corredores</option>
+    </select>
+    <select id="destinoFiltro" class="search-input" style="max-width:180px;" onchange="renderEgresos()">
+      <option value="Todos">Todos los destinos</option>
+    </select>
+  </div>
+
+  <div class="toolbar filters-row" id="cerealTabsEgresoRow">
+    <div class="tabs" id="cerealTabsEgreso">
+      <button class="tab active cereal-chip" data-cereal="Todos">Todos</button>
+    </div>
+  </div>
+
+  <main>
+    <div id="panelCuposPendientes">
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+        <h3 class="egreso-heading" style="margin:0;">📋 Cupos pendientes para cargar</h3>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="tabs" id="rangoPendientesTabs">
+            <button class="tab active" data-rango="hoy">Hoy</button>
+            <button class="tab" data-rango="semana">Esta semana</button>
+            <button class="tab" data-rango="todos">Todos</button>
+          </div>
+          <button class="btn-ghost" onclick="imprimirPendientes()">🖨️ Imprimir</button>
+        </div>
+      </div>
+      <div id="areaImprimible">
+        <h2 id="tituloImpresion" style="display:none; font-family:'Space Grotesk',sans-serif;"></h2>
+        <div id="cuposPendientes"></div>
+      </div>
+    </div>
+
+    <div id="panelCamiones" style="display:none;">
+      <h3 class="egreso-heading">🚛 Camiones cargando</h3>
+      <div id="boardEgresos"></div>
+    </div>
+
+    <div id="panelFinalizados" style="display:none;">
+      <h3 class="egreso-heading">✅ Camiones cargados</h3>
+      <div id="boardEgresosFinalizados"></div>
+    </div>
+  </main>
+</div><!-- /seccionEgresos -->
+
+<footer class="foot">Conectado a Google Sheets — Ingresos y Egresos CL</footer>
+
+<!-- ---------- Modal nuevo ingreso ---------- -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitulo">Nuevo ingreso</h2>
+    <div class="hint" id="modalHint">Cargá los datos del camión que llega a descargar. Si el cliente, campo o chofer no están en la lista, escribilos igual — se guardan solos. El cupo no aplica acá, es solo para egresos.</div>
+    <div class="form-grid">
+      <div>
+        <label for="fCliente">Cliente</label>
+        <input type="text" id="fCliente" list="clienteListDL" placeholder="Escribí o elegí un cliente" autocomplete="off" oninput="actualizarCamposDatalist(); onClienteChange();">
+        <datalist id="clienteListDL"></datalist>
+        <div id="clienteNuevoAviso" class="chofer-nuevo-aviso" style="display:none;">
+          ⚠ Cliente nuevo — <button type="button" class="link-inline" onclick="abrirNuevoCliente()">cargar campo y km</button>
+        </div>
+      </div>
+      <div>
+        <label for="fCampo">Campo</label>
+        <input type="text" id="fCampo" list="campoListDL" placeholder="Ej: Campo La Estrella" autocomplete="off">
+        <datalist id="campoListDL"></datalist>
+        <div class="chofer-nuevo-aviso" style="background:var(--panel-2); color:var(--ink-soft);">
+          <button type="button" class="link-inline" style="color:var(--steel);" onclick="abrirNuevoCliente(true)">+ Agregar otro campo para este cliente</button>
+        </div>
+      </div>
+      <div>
+        <label for="fCereal">Cereal</label>
+        <select id="fCereal">
+          <option>Trigo</option>
+          <option>Maíz</option>
+          <option>Soja</option>
+          <option>Cebada Cervecera</option>
+          <option>Cebada Forrajera</option>
+          <option>Girasol</option>
+        </select>
+      </div>
+      <div>
+        <label for="fPlanta">Planta</label>
+        <select id="fPlanta">
+          <option>Mónaco</option>
+          <option>La Virgen</option>
+        </select>
+      </div>
+      <div>
+        <label for="fChofer">Chofer / Transporte</label>
+        <input type="text" id="fChofer" list="choferListDL" placeholder="Escribí o elegí un chofer" autocomplete="off" oninput="onChoferChange()">
+        <datalist id="choferListDL"></datalist>
+        <div id="choferNuevoAviso" class="chofer-nuevo-aviso" style="display:none;">
+          ⚠ Chofer nuevo — <button type="button" class="link-inline" onclick="abrirNuevoTransporte()">cargar datos completos del transporte</button>
+        </div>
+      </div>
+      <div>
+        <label for="fDominio">Dominio</label>
+        <input type="text" id="fDominio">
+      </div>
+      <div class="full">
+        <label for="fObs">Observaciones</label>
+        <input type="text" id="fObs" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" id="modalBtnGuardar" onclick="guardarModal()">Registrar ingreso</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal mantenimiento / limpieza manual ---------- -->
+<div class="modal-overlay" id="mantOverlay">
+  <div class="modal">
+    <h2>Limpiar ingresos finalizados</h2>
+    <div class="hint">
+      Solo se borran ingresos con estado <strong>Finalizado</strong> dentro del rango elegido.
+      Los que están en proceso nunca se tocan, sin importar la fecha. Esta acción no se puede deshacer.
+    </div>
+    <div class="form-grid">
+      <div>
+        <label for="mFechaDesde">Desde</label>
+        <input type="date" id="mFechaDesde">
+      </div>
+      <div>
+        <label for="mFechaHasta">Hasta</label>
+        <input type="date" id="mFechaHasta">
+      </div>
+    </div>
+    <div id="mantPreview" style="margin-top:14px; font-size:13px; color:var(--ink-soft);"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeMantenimiento()">Cerrar</button>
+      <button class="btn-ghost" onclick="previsualizarLimpiezaUI()">Ver cuántos se borrarían</button>
+      <button class="btn-ghost" style="background:var(--rust);color:#fff;border-color:var(--rust);" onclick="confirmarLimpieza()">Borrar ahora</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal nuevo transporte ---------- -->
+<div class="modal-overlay" id="transporteOverlay">
+  <div class="modal">
+    <h2>Nuevo transporte</h2>
+    <div class="hint">Cargá los datos completos. Al guardar, queda disponible para elegir en cualquier ingreso.</div>
+    <div class="form-grid">
+      <div>
+        <label for="tNombreChofer">Nombre del chofer</label>
+        <input type="text" id="tNombreChofer">
+      </div>
+      <div>
+        <label for="tCuitChofer">CUIT chofer</label>
+        <input type="text" id="tCuitChofer" placeholder="Opcional">
+      </div>
+      <div>
+        <label for="tNombreTransporte">Nombre del transporte</label>
+        <input type="text" id="tNombreTransporte" placeholder="Ej: mismo nombre del chofer si es monotributista">
+      </div>
+      <div>
+        <label for="tCuitTransporte">CUIT transporte</label>
+        <input type="text" id="tCuitTransporte" placeholder="Opcional">
+      </div>
+      <div>
+        <label for="tDominioChasis">Dominio chasis</label>
+        <input type="text" id="tDominioChasis" placeholder="Ej: ABC123">
+      </div>
+      <div>
+        <label for="tDominioAcoplado">Dominio acoplado</label>
+        <input type="text" id="tDominioAcoplado" placeholder="Ej: XYZ789">
+      </div>
+      <div>
+        <label for="tEscalable">Escalable</label>
+        <select id="tEscalable">
+          <option value="NO">No</option>
+          <option value="SI">Sí</option>
+        </select>
+      </div>
+      <div>
+        <label for="tPesoBruto">Peso bruto máximo</label>
+        <input type="text" id="tPesoBruto" placeholder="Ej: 45.000 kg">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeNuevoTransporte()">Cancelar</button>
+      <button class="btn-primary" id="transporteBtnGuardar" onclick="guardarNuevoTransporte()">Guardar transporte</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal nuevo cliente ---------- -->
+<div class="modal-overlay" id="clienteOverlay">
+  <div class="modal">
+    <h2 id="clienteModalTitulo">Nuevo cliente</h2>
+    <div class="hint" id="clienteModalHint">Cargá el campo y los km si los tenés a mano. Si tiene más de un campo, podés repetir esto luego con otro campo distinto para el mismo cliente.</div>
+    <div class="form-grid">
+      <div class="full">
+        <label for="cNombreCliente">Nombre del cliente</label>
+        <input type="text" id="cNombreCliente">
+      </div>
+      <div>
+        <label for="cCampo">Campo</label>
+        <input type="text" id="cCampo" placeholder="Ej: Campo La Estrella">
+      </div>
+      <div>
+        <label for="cKm">Km</label>
+        <input type="text" id="cKm" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeNuevoCliente()">Cancelar</button>
+      <button class="btn-primary" id="clienteBtnGuardar" onclick="guardarNuevoCliente()">Guardar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal asignar/editar camión de egreso ---------- -->
+<div class="modal-overlay" id="egresoOverlay">
+  <div class="modal">
+    <h2 id="egresoModalTitulo">Nuevo egreso</h2>
+    <div class="hint" id="egresoModalHint">Si ya sabés a qué cupo va, elegilo. Si no, dejalo vacío — se asigna cuando el camión termine de cargar.</div>
+    <div class="form-grid">
+      <div class="full">
+        <label for="eCodigoCupo">Código de cupo (opcional)</label>
+        <input type="text" id="eCodigoCupo" list="cupoPendienteDL" placeholder="Dejalo vacío si todavía no lo sabés" autocomplete="off" oninput="onCupoEgresoChange()">
+        <datalist id="cupoPendienteDL"></datalist>
+      </div>
+      <div class="full" id="egresoCupoResumen" style="background:var(--panel-2); border-radius:8px; padding:10px 12px; font-size:12.5px; color:var(--ink-soft); display:none;"></div>
+      <div>
+        <label for="eCereal">Cereal (opcional)</label>
+        <select id="eCereal" onchange="poblarFiltrosEgreso(this.value)">
+          <option value="">— Todavía no se sabe —</option>
+          <option>Trigo</option>
+          <option>Maíz</option>
+          <option>Soja</option>
+          <option>Cebada Cervecera</option>
+          <option>Cebada Forrajera</option>
+          <option>Girasol</option>
+        </select>
+      </div>
+      <div>
+        <label for="eOrigen">Origen</label>
+        <select id="eOrigen">
+          <option value="Acopio">🏭 Acopio</option>
+          <option value="Campo">🌾 Campo</option>
+        </select>
+      </div>
+      <div>
+        <label for="ePlanta">Planta</label>
+        <select id="ePlanta">
+          <option>Mónaco</option>
+          <option>La Virgen</option>
+        </select>
+      </div>
+      <div>
+        <label for="eChofer">Chofer / Transporte</label>
+        <input type="text" id="eChofer" list="choferListDL" placeholder="Escribí o elegí un chofer" autocomplete="off" oninput="onChoferChangeEgreso()">
+      </div>
+      <div>
+        <label for="eDominio">Dominio</label>
+        <input type="text" id="eDominio">
+      </div>
+      <div class="full">
+        <label for="eObs">Observaciones</label>
+        <input type="text" id="eObs" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEgresoModal()">Cancelar</button>
+      <button class="btn-primary" id="egresoBtnGuardar" onclick="guardarEgresoModal()">Asignar camión</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal nuevo cupo ---------- -->
+<div class="modal-overlay" id="cupoOverlay">
+  <div class="modal">
+    <h2 id="cupoModalTitulo">Nuevo cupo</h2>
+    <div class="hint" id="cupoModalHint">El código de cupo lo escribís vos (suele venir del corredor o del sistema de la empresa) — acá no se inventa. Si tenés varios cupos con los mismos datos, pegalos todos juntos, uno por línea.</div>
+    <div class="form-grid">
+      <div class="full">
+        <label for="cuCodigosCupo">Código(s) de cupo <span id="cuCodigosContador" style="font-weight:400; text-transform:none; color:var(--ink-soft);"></span></label>
+        <textarea id="cuCodigosCupo" rows="3" placeholder="Un código por línea. Ej:&#10;QQ478920042026&#10;QQ478920042027&#10;QQ478920042028" oninput="actualizarContadorCupos()" style="width:100%; padding:9px 10px; border-radius:7px; border:1px solid var(--line); background:var(--panel-2); font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--ink); resize:vertical;"></textarea>
+      </div>
+      <div>
+        <label for="cuFecha">Fecha</label>
+        <input type="date" id="cuFecha">
+      </div>
+      <div>
+        <label for="cuCliente">Cliente</label>
+        <input type="text" id="cuCliente" list="clienteListDL" placeholder="Escribí o elegí un cliente" autocomplete="off">
+      </div>
+      <div>
+        <label for="cuCereal">Cereal</label>
+        <select id="cuCereal">
+          <option>Trigo</option>
+          <option>Maíz</option>
+          <option>Soja</option>
+          <option>Cebada Cervecera</option>
+          <option>Cebada Forrajera</option>
+          <option>Girasol</option>
+        </select>
+      </div>
+      <div>
+        <label for="cuCorredor">Corredor</label>
+        <input type="text" id="cuCorredor" list="corredorListDL" placeholder="Escribí uno nuevo o elegí de la lista" autocomplete="off">
+        <datalist id="corredorListDL"></datalist>
+        <div class="chofer-nuevo-aviso" style="background:var(--panel-2); color:var(--ink-soft); display:block;">💡 Podés escribir un corredor que no esté en la lista — se guarda igual</div>
+      </div>
+      <div>
+        <label for="cuDestino">Destino</label>
+        <input type="text" id="cuDestino" list="destinoListDL" placeholder="Escribí uno nuevo o elegí de la lista" autocomplete="off">
+        <datalist id="destinoListDL"></datalist>
+        <div class="chofer-nuevo-aviso" style="background:var(--panel-2); color:var(--ink-soft); display:block;">💡 Podés escribir un destino que no esté en la lista — se guarda igual</div>
+      </div>
+      <div class="full">
+        <label for="cuObs">Observaciones</label>
+        <input type="text" id="cuObs" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeNuevoCupo()">Cancelar</button>
+      <button class="btn-primary" id="cupoBtnGuardar" onclick="guardarNuevoCupo()">Guardar cupo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal confirmar carga: asignar cupo + carta de porte al finalizar ---------- -->
+<div class="modal-overlay" id="finalizarOverlay">
+  <div class="modal">
+    <h2>Confirmar carga completa</h2>
+    <div class="hint">Este camión terminó de cargar sin cupo asignado. Elegí a qué cupo corresponde y cargá la carta de porte.</div>
+    <div class="form-grid">
+      <div class="full">
+        <label for="finCodigoCupo">Código de cupo</label>
+        <input type="text" id="finCodigoCupo" list="cupoPendienteDL" placeholder="Escribí o elegí el cupo" autocomplete="off">
+      </div>
+      <div class="full">
+        <label for="finCartaPorte">Carta de porte</label>
+        <input type="text" id="finCartaPorte" placeholder="Número de carta de porte">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeFinalizarModal()">Cancelar</button>
+      <button class="btn-primary" id="finalizarBtnGuardar" onclick="confirmarFinalizarEgreso()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal buscar transporte (sin necesidad de un viaje cargado) ---------- -->
+<div class="modal-overlay" id="buscarTransporteOverlay">
+  <div class="modal">
+    <h2>Buscar transporte</h2>
+    <div class="hint">Elegí un chofer para ver y compartir sus datos, sin necesidad de tener un ingreso o egreso cargado.</div>
+    <div class="form-grid">
+      <div class="full">
+        <label for="btChofer">Chofer</label>
+        <input type="text" id="btChofer" list="choferListDL" placeholder="Escribí o elegí un chofer" autocomplete="off" oninput="onBuscarTransporteChange()">
+      </div>
+      <div class="full" id="btPreview" style="display:none; background:var(--panel-2); border-radius:8px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:12.5px; white-space:pre-wrap; color:var(--ink);"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeBuscarTransporte()">Cerrar</button>
+      <button class="btn-primary" id="btCompartirBtn" onclick="compartirDesdeBusqueda()" style="display:none;">📤 Compartir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   API — conectado al Apps Script real (Web App)
+   ============================================================ */
+const API_URL = "https://script.google.com/macros/s/AKfycbzrtiBGBbMyvUY3vdTm4cFs_RYk9bdktFdfP9gU_NcwlMFSs7PgwCYaw4LEe6naN2Mf/exec";
+
+const STAGES = ["Anunciado", "Arribo", "Calado", "Descargando", "Finalizado"];
+// Un color propio por etapa, para identificarla rápido de un vistazo
+const COLOR_POR_ETAPA = [
+  { c:"var(--steel)",  s:"var(--steel-soft)"  }, // Anunciado
+  { c:"var(--amber)",  s:"var(--amber-soft)"  }, // Arribo
+  { c:"var(--violet)", s:"var(--violet-soft)" }, // Calado
+  { c:"var(--rust)",   s:"var(--rust-soft)"   }, // Descargando
+  { c:"var(--green)",  s:"var(--green-soft)"  }, // Finalizado
+];
+
+const CEREALES = {
+  "Trigo":             { emoji:"🌾", color:"#8A6A1E", bg:"#F3E2BC" },
+  "Maíz":              { emoji:"🌽", color:"#B4502E", bg:"#F3DCC8" },
+  "Soja":              { emoji:"🟢", color:"#3E6B3E", bg:"#DCE8DA" },
+  "Cebada Cervecera":  { emoji:"🍺", color:"#8A5A2B", bg:"#EADFCB" },
+  "Cebada Forrajera":  { emoji:"🌱", color:"#5B7A3A", bg:"#E1E8D4" },
+  "Girasol":           { emoji:"🌻", color:"#A67D14", bg:"#F5EAC0" },
+};
+function estiloCereal(nombre){
+  return CEREALES[nombre] || { emoji:"🌿", color:"#625C50", bg:"#E9E5DA" };
+}
+const REFRESCO_MS = 20000; // polling cada 20s
+
+let TRANSPORTES = [];
+let CLIENTES = [];
+let ingresos = [];
+let egresos = [];
+let cupos = [];
+let CORREDORES = [];
+let DESTINOS = [];
+let plantaFiltro = "Todas";
+let vistaModo = "tarjetas";
+let cerealFiltro = "Todos";
+let soloPurgados = false;
+let modoApp = "ingresos";
+let plantaFiltroEgreso = "Todas";
+let origenFiltroEgreso = "Todos";
+let cargando = false;
+const STAGES_EGRESO = ["Anunciado", "Arribo", "Cargando", "Finalizado"];
+const COLOR_POR_ETAPA_EGRESO = [
+  { c:"var(--steel)", s:"var(--steel-soft)" }, // Anunciado
+  { c:"var(--amber)", s:"var(--amber-soft)" }, // Arribo
+  { c:"var(--rust)",  s:"var(--rust-soft)"  }, // Cargando
+  { c:"var(--green)", s:"var(--green-soft)" }, // Finalizado
+];
+
+/* Busca un valor entre varios nombres de columna posibles,
+   sin importar mayúsculas/minúsculas ni espacios
+   (ej: "CLIENTE", "Cliente" y "Clientes" matchean igual) */
+function campo(obj, ...posibles){
+  const normalizar = s => String(s).toUpperCase().replace(/\s+/g, "");
+  const posiblesNorm = posibles.map(normalizar);
+  for(const key of Object.keys(obj)){
+    if(posiblesNorm.includes(normalizar(key)) && obj[key] !== undefined && obj[key] !== ""){
+      return obj[key];
+    }
+  }
+  return "";
+}
+
+/* ---------- Carga de datos desde el Sheet ---------- */
+async function cargarDatos(mostrarError = true){
+  try{
+    cargando = true;
+    const res = await fetch(API_URL);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+
+    TRANSPORTES = (data.transportes || []).map(t => ({
+      chofer: campo(t, "NombreChofer"),
+      cuitChofer: campo(t, "CUITChofer"),
+      nombreTransporte: campo(t, "NombreTransporte"),
+      cuitTransporte: campo(t, "CUITTransporte"),
+      dominioChasis: campo(t, "DominioChasis"),
+      dominioAcoplado: campo(t, "DominioAcoplado"),
+      escalable: campo(t, "Escalable"),
+      pesoBrutoMaximo: campo(t, "PesoBrutoMaximo"),
+    }));
+
+    CLIENTES = (data.clientes || []).map(c => ({
+      cliente: campo(c, "Cliente", "Clientes"),
+      campo: campo(c, "Campo"),
+      km: campo(c, "Km"),
+    })).filter(x => x.cliente);
+
+    ingresos = (data.ingresos || []).map(i => ({
+      id: campo(i, "ID"),
+      fecha: campo(i, "Fecha"),
+      cliente: campo(i, "Cliente"),
+      campo: campo(i, "Campo"),
+      cereal: campo(i, "Cereal"),
+      chofer: campo(i, "Chofer") || "—",
+      dominio: campo(i, "Dominio") || "—",
+      planta: campo(i, "Planta"),
+      estado: Number(campo(i, "Estado")) || 0,
+      horaArribo: campo(i, "HoraArribo"),
+      horaCalado: campo(i, "HoraCalado"),
+      horaFin: campo(i, "HoraFin"),
+      parcial: campo(i, "Parcial") === true || campo(i, "Parcial") === "TRUE" || campo(i, "Parcial") === "Sí",
+      plantaParcial: campo(i, "PlantaParcial"),
+      cantidadParcial: campo(i, "CantidadParcial"),
+      obs: campo(i, "Observaciones"),
+      humedad: campo(i, "Humedad"),
+      orden: campo(i, "Orden"),
+    }));
+
+    cupos = (data.cupos || []).map(c => ({
+      codigoCupo: campo(c, "CodigoCupo", "Código Cupo"),
+      fecha: campo(c, "Fecha"),
+      dia: campo(c, "Dia", "Día"),
+      cereal: campo(c, "Cereal"),
+      cliente: campo(c, "Cliente/Cereales", "Cliente"),
+      corredor: campo(c, "Corredor"),
+      destino: campo(c, "Destino"),
+      observaciones: campo(c, "Observaciones"),
+    })).filter(c => c.codigoCupo);
+
+    egresos = (data.egresos || []).map(eg => ({
+      id: campo(eg, "ID"),
+      fecha: campo(eg, "Fecha"),
+      codigoCupo: campo(eg, "CodigoCupo", "Código Cupo"),
+      cliente: campo(eg, "Cliente"),
+      cereal: campo(eg, "Cereal"),
+      corredor: campo(eg, "Corredor"),
+      destino: campo(eg, "Destino"),
+      origen: campo(eg, "Origen"),
+      planta: campo(eg, "Planta"),
+      chofer: campo(eg, "Chofer") || "—",
+      dominio: campo(eg, "Dominio") || "—",
+      estado: Number(campo(eg, "Estado")) || 0,
+      horaArribo: campo(eg, "HoraArribo"),
+      horaCargando: campo(eg, "HoraCargando"),
+      horaFin: campo(eg, "HoraFin"),
+      obs: campo(eg, "Observaciones"),
+    }));
+
+    CORREDORES = data.corredores || [];
+    DESTINOS = data.destinos || [];
+
+    poblarListas();
+    poblarCerealTabs();
+    render();
+    renderEgresos();
+  }catch(err){
+    if(mostrarError){
+      document.getElementById("board").innerHTML =
+        `<div class="empty-state">No se pudo conectar con el Sheet.<br><span class="mono" style="font-size:11px">${err.message}</span></div>`;
+    }
+    console.error("Error cargando datos:", err);
+  }finally{
+    cargando = false;
+  }
+}
+
+/* ---------- Envío de acciones al backend ---------- */
+async function enviarAccion(payload){
+  const res = await fetch(API_URL, {
+    method: "POST",
+    // text/plain evita el preflight CORS que Apps Script no maneja bien
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "Error desconocido");
+  return data.resultado;
+}
+
+/* ---------- Init ---------- */
+function init(){
+  document.getElementById("todayChip").textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
+
+  document.querySelectorAll("#plantTabs .tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#plantTabs .tab").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      plantaFiltro = btn.dataset.plant;
+      render();
+    });
+  });
+
+  document.querySelectorAll("#vistaTabs .tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#vistaTabs .tab").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      vistaModo = btn.dataset.vista;
+      render();
+    });
+  });
+
+  document.querySelectorAll("#modoAppTabs .modo-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#modoAppTabs .modo-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      modoApp = btn.dataset.modo;
+      document.getElementById("seccionIngresos").style.display = modoApp === "ingresos" ? "" : "none";
+      document.getElementById("seccionEgresos").style.display = modoApp === "egresos" ? "" : "none";
+      document.getElementById("accionesIngresos").style.display = modoApp === "ingresos" ? "" : "none";
+      document.getElementById("accionesEgresos").style.display = modoApp === "egresos" ? "" : "none";
+      document.getElementById("modoTitulo").textContent = modoApp === "ingresos" ? "Ingresos" : "Egresos";
+      if(modoApp === "egresos") renderEgresos();
+    });
+  });
+
+  document.querySelectorAll("#plantTabsEgreso .tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#plantTabsEgreso .tab").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      plantaFiltroEgreso = btn.dataset.plant;
+      renderEgresos();
+    });
+  });
+
+  document.querySelectorAll("#origenTabs .tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#origenTabs .tab").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      origenFiltroEgreso = btn.dataset.origen;
+      renderEgresos();
+    });
+  });
+
+  document.querySelectorAll("#vistaTabsEgreso .tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#vistaTabsEgreso .tab").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      vistaModoEgreso = btn.dataset.vista;
+      renderEgresos();
+    });
+  });
+
+  document.querySelectorAll("#rangoPendientesTabs .tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#rangoPendientesTabs .tab").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      rangoPendientes = btn.dataset.rango;
+      renderEgresos();
+    });
+  });
+
+  document.querySelectorAll("#subVistaEgresoTabs .tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#subVistaEgresoTabs .tab").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      const subvista = btn.dataset.subvista;
+      document.getElementById("panelCuposPendientes").style.display = subvista === "cupos" ? "" : "none";
+      document.getElementById("panelCamiones").style.display = subvista === "camiones" ? "" : "none";
+      document.getElementById("panelFinalizados").style.display = subvista === "finalizados" ? "" : "none";
+    });
+  });
+
+  cargarDatos();
+  setInterval(() => cargarDatos(false), REFRESCO_MS);
+}
+
+function toggleSoloPurgados(){
+  soloPurgados = !soloPurgados;
+  render();
+}
+
+function poblarCerealTabs(){
+  const cerealesPresentes = [...new Set(ingresos.map(i => i.cereal).filter(Boolean))].sort();
+  const cont = document.getElementById("cerealTabs");
+  const activo = cerealFiltro;
+
+  let html = `<button class="tab cereal-chip ${activo==="Todos" ? "active" : ""}" data-cereal="Todos">Todos</button>`;
+  cerealesPresentes.forEach(nombre => {
+    const c = estiloCereal(nombre);
+    const isActive = activo === nombre;
+    html += `<button class="tab cereal-chip ${isActive ? "active" : ""}" data-cereal="${nombre}" style="${isActive ? `background:${c.color};border-color:${c.color};color:#fff;` : ""}">${c.emoji} ${nombre}</button>`;
+  });
+  cont.innerHTML = html;
+
+  cont.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      cerealFiltro = btn.dataset.cereal;
+      poblarCerealTabs();
+      render();
+    });
+  });
+}
+
+function poblarListas(){
+  const clientesUnicos = [...new Set(CLIENTES.map(c => c.cliente))].sort();
+  document.getElementById("clienteListDL").innerHTML =
+    clientesUnicos.map(c => `<option value="${c}"></option>`).join("");
+
+  const choferesUnicos = [...new Set(TRANSPORTES.map(t => t.chofer))].sort();
+  document.getElementById("choferListDL").innerHTML =
+    choferesUnicos.map(c => `<option value="${c}"></option>`).join("");
+
+  actualizarCamposDatalist();
+}
+
+/* Filtra las sugerencias de Campo según el cliente tipeado (soporta
+   varios campos por cliente). Si el cliente todavía no matchea ninguno
+   conocido, muestra todos los campos como sugerencia general. */
+function actualizarCamposDatalist(){
+  const clienteVal = (document.getElementById("fCliente").value || "").trim().toLowerCase();
+  let campos = CLIENTES.filter(c => c.cliente.toLowerCase() === clienteVal).map(c => c.campo);
+  if(campos.length === 0){
+    campos = CLIENTES.map(c => c.campo);
+  }
+  campos = [...new Set(campos.filter(Boolean))].sort();
+  document.getElementById("campoListDL").innerHTML =
+    campos.map(c => `<option value="${c}"></option>`).join("");
+}
+
+/* ---------- Render tablero ---------- */
+function render(){
+  const board = document.getElementById("board");
+  const busqueda = (document.getElementById("buscador").value || "").trim().toLowerCase();
+
+  const etapaFiltro = document.getElementById("etapaFiltro").value;
+
+  const visibles = ingresos
+    .filter(i => plantaFiltro === "Todas" || i.planta === plantaFiltro)
+    .filter(i => {
+      if(etapaFiltro === "pendientes") return i.estado < 4;
+      if(etapaFiltro === "todos") return true;
+      return i.estado === Number(etapaFiltro); // etapa puntual (0-4)
+    })
+    .filter(i => cerealFiltro === "Todos" || i.cereal === cerealFiltro)
+    .filter(i => !soloPurgados || i.parcial)
+    .filter(i => {
+      if(!busqueda) return true;
+      return (i.cliente || "").toLowerCase().includes(busqueda) ||
+             (i.campo || "").toLowerCase().includes(busqueda) ||
+             (i.chofer || "").toLowerCase().includes(busqueda);
+    })
+    .sort((a,b)=>{
+      // Finalizados siempre al fondo
+      if(a.estado===4 && b.estado!==4) return 1;
+      if(b.estado===4 && a.estado!==4) return -1;
+      // Los que todavía no arribaron (sin hora) quedan al final del grupo.
+      if(!a.horaArribo && b.horaArribo) return 1;
+      if(!b.horaArribo && a.horaArribo) return -1;
+      if(a.horaArribo && b.horaArribo){
+        // Entre los que ya arribaron: respeta el orden manual (drag&drop) si existe.
+        const ao = (a.orden !== undefined && a.orden !== "" && a.orden !== null) ? Number(a.orden) : null;
+        const bo = (b.orden !== undefined && b.orden !== "" && b.orden !== null) ? Number(b.orden) : null;
+        if(ao !== null && bo !== null) return ao - bo;
+        if(ao !== null) return -1;
+        if(bo !== null) return 1;
+        return a.horaArribo.localeCompare(b.horaArribo); // sin orden manual: por hora real de llegada
+      }
+      return 0;
+    });
+
+  // Numerar la cola: solo a los que ya arribaron y siguen en proceso
+  // (todavía no llegan / ya finalizados no forman parte de la fila física)
+  let contadorCola = 0;
+  visibles.forEach(i => {
+    i.queueNum = (i.estado < 4 && i.horaArribo) ? ++contadorCola : null;
+  });
+
+  document.getElementById("counts").innerHTML = `
+    <span class="count-pill">En proceso: ${ingresos.filter(i=>i.estado<4).length}</span>
+    <span class="count-pill">En calado: ${ingresos.filter(i=>i.estado===2).length}</span>
+    <span class="count-pill">Finalizados hoy: ${ingresos.filter(i=>i.estado===4).length}</span>
+  `;
+
+  const purgadosEnProceso = ingresos.filter(i => i.parcial && i.estado < 4).length;
+  const btnPurgados = document.getElementById("btnSoloPurgados");
+  btnPurgados.textContent = `🔄 Solo purgados (${purgadosEnProceso})`;
+  if(soloPurgados){
+    btnPurgados.style.background = "var(--purga)";
+    btnPurgados.style.color = "#fff";
+    btnPurgados.style.borderColor = "var(--purga)";
+  }else{
+    btnPurgados.style.background = "";
+    btnPurgados.style.color = "";
+    btnPurgados.style.borderColor = "";
+  }
+
+  if(visibles.length === 0){
+    const motivo = busqueda ? "No hay ingresos que coincidan con la búsqueda."
+      : etapaFiltro === "4" ? "Todavía no hay ingresos finalizados."
+      : "No hay ingresos que coincidan con estos filtros.";
+    board.innerHTML = `<div class="empty-state">${motivo}</div>`;
+    return;
+  }
+
+  const renderer = vistaModo === "compacta" ? compactHTML : cardHTML;
+  board.innerHTML = visibles.map(renderer).join("");
+}
+
+function pipelineHTML(i){
+  const ultimaEtapa = STAGES.length - 1;
+  return STAGES.map((s, idx)=>{
+    let cls = "stage";
+    let estiloExtra = "";
+    if(idx < i.estado || (idx === i.estado && idx === ultimaEtapa)) cls += " done";
+    else if(idx === i.estado){
+      cls += " current";
+      const col = COLOR_POR_ETAPA[idx];
+      estiloExtra = ` style="--color-etapa:${col.c};--color-etapa-soft:${col.s};"`;
+    }
+    const time = idx===1 ? i.horaArribo : idx===2 ? i.horaCalado : idx===4 ? i.horaFin : "";
+    const humedadHTML = (idx===2 && i.humedad) ? `<div class="time" style="color:var(--violet);font-weight:600;">H: ${i.humedad}%</div>` : "";
+    return `<div class="${cls}"${estiloExtra}><div class="dot"></div><div class="lbl">${s}</div><div class="time">${time||""}</div>${humedadHTML}</div>`;
+  }).join("");
+}
+
+/* ---------- Compartir datos de un transporte ---------- */
+function textoTransporte(nombreChofer){
+  const t = TRANSPORTES.find(x => x.chofer.toLowerCase() === (nombreChofer||"").toLowerCase());
+  if(!t) return null;
+  return `TRANSPORTE: ${t.nombreTransporte || "—"}
+CUIT TRANSPORTE: ${t.cuitTransporte || "—"}
+CHOFER: ${t.chofer || "—"}
+CUIT CHOFER: ${t.cuitChofer || "—"}
+CHASIS: ${t.dominioChasis || "—"}
+ACOPLADO: ${t.dominioAcoplado || "—"}
+ESCALABLE: ${t.escalable || "—"}
+PESO BRUTO MAXIMO: ${t.pesoBrutoMaximo || "—"}`;
+}
+
+async function compartirTransporte(nombreChofer){
+  const texto = textoTransporte(nombreChofer);
+  if(!texto){ alert("No encontré los datos completos de este chofer en Transportes."); return; }
+
+  // En celular con la Web Share API: abre el menú nativo (WhatsApp, etc.)
+  if(navigator.share){
+    try{
+      await navigator.share({ text: texto });
+      return;
+    }catch(err){
+      return; // el usuario canceló el share nativo, no hace falta hacer nada más
+    }
+  }
+
+  // En desktop sin Web Share API: copiar al portapapeles
+  try{
+    await navigator.clipboard.writeText(texto);
+    alert("Datos copiados al portapapeles:\n\n" + texto);
+  }catch(err){
+    prompt("Copiá estos datos:", texto);
+  }
+}
+
+function abrirBuscarTransporte(){
+  document.getElementById("btChofer").value = "";
+  document.getElementById("btPreview").style.display = "none";
+  document.getElementById("btCompartirBtn").style.display = "none";
+  document.getElementById("buscarTransporteOverlay").classList.add("open");
+}
+
+function closeBuscarTransporte(){
+  document.getElementById("buscarTransporteOverlay").classList.remove("open");
+}
+
+function onBuscarTransporteChange(){
+  const nombre = document.getElementById("btChofer").value.trim();
+  const texto = textoTransporte(nombre);
+  const preview = document.getElementById("btPreview");
+  const boton = document.getElementById("btCompartirBtn");
+
+  if(texto){
+    preview.textContent = texto;
+    preview.style.display = "block";
+    boton.style.display = "";
+  }else{
+    preview.style.display = "none";
+    boton.style.display = "none";
+  }
+}
+
+function compartirDesdeBusqueda(){
+  const nombre = document.getElementById("btChofer").value.trim();
+  compartirTransporte(nombre);
+}
+
+function actionsHTML(i){
+  let actions = `<button class="btn-ghost" onclick="togglePlanta('${i.id}')">Marcar parcial</button>`;
+  if(i.estado > 0){
+    actions += `<button class="btn-ghost" onclick="retroceder('${i.id}')">← Volver a ${STAGES[i.estado-1]}</button>`;
+  }
+  if(i.estado < 4){
+    actions += `<button class="btn-ghost advance" onclick="avanzar('${i.id}')">Avanzar a ${STAGES[i.estado+1]}</button>`;
+  }
+  actions += `<button class="btn-ghost link" onclick="editarObs('${i.id}')">Editar observaciones</button>`;
+  actions += `<button class="btn-ghost link" onclick="editarIngresoUI('${i.id}')">Editar datos</button>`;
+  if(i.chofer && i.chofer !== "—"){
+    actions += `<button class="btn-ghost link" onclick="compartirTransporte('${i.chofer}')">📤 Compartir transporte</button>`;
+  }
+  actions += `<button class="btn-ghost link" style="color:var(--rust);" onclick="borrarIngresoUI('${i.id}')">Borrar</button>`;
+  return actions;
+}
+
+function cardHTML(i){
+  const plantClass = i.planta === "Mónaco" ? "plant-monaco" : "plant-virgen";
+  const cer = estiloCereal(i.cereal);
+  const parcialNote = i.parcial ? `<div class="parcial-note">⇄ Descargó parcial en ${i.plantaParcial}${i.cantidadParcial ? " — " + i.cantidadParcial : ""}</div>` : "";
+
+  return `
+    <div class="card${i.queueNum ? " queue-draggable" : ""}"${i.queueNum ? ` draggable="true" data-id="${i.id}" ondragstart="dragStartIngreso(event,'${i.id}')" ondragend="dragEndIngreso(event)" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="onDropQueueItem(event,'${i.id}')"` : ""}>
+      <div class="card-top">
+        <div class="card-title" style="flex-direction:row; align-items:center; gap:10px;">
+          ${i.queueNum ? `<span class="drag-handle" title="Arrastrá para reordenar">⠿</span><span class="queue-badge">${i.queueNum}º</span>` : ""}
+          <div style="display:flex; flex-direction:column;">
+            <span class="cliente">${i.cliente}</span>
+            <span class="campo">${i.campo}</span>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="cereal-badge" style="background:${cer.bg}; color:${cer.color};">${cer.emoji} ${i.cereal}</span>
+          ${i.parcial ? `<span class="cereal-badge" style="background:var(--purga-soft); color:var(--purga);">🔄 Purgado</span>` : ""}
+          <span class="plant-tag ${plantClass}">${i.planta}</span>
+        </div>
+      </div>
+
+      <div class="meta-row">
+        <div class="meta-item"><span class="label">Fecha</span><span class="value mono">${i.fecha || "—"}</span></div>
+        <div class="meta-item"><span class="label">Chofer</span><span class="value">${i.chofer}</span></div>
+        <div class="meta-item"><span class="label">Dominio</span><span class="value mono">${i.dominio}</span></div>
+        <div class="meta-item"><span class="label">ID</span><span class="value mono">${i.id}</span></div>
+      </div>
+
+      <div class="pipeline">${pipelineHTML(i)}</div>
+      ${parcialNote}
+      ${i.obs ? `<div class="parcial-note" style="background:var(--panel-2);color:var(--ink-soft)">📝 ${i.obs}</div>` : ""}
+
+      <div class="card-actions">${actionsHTML(i)}</div>
+    </div>
+  `;
+}
+
+/* ---------- Vista compacta ---------- */
+let expandidos = new Set();
+
+/* ---------- Reordenar la cola manualmente (drag & drop) ---------- */
+let draggedIngresoId = null;
+
+function dragStartIngreso(e, id){
+  draggedIngresoId = id;
+  e.dataTransfer.effectAllowed = "move";
+  e.currentTarget.classList.add("dragging");
+}
+
+function dragEndIngreso(e){
+  e.currentTarget.classList.remove("dragging");
+  document.querySelectorAll(".queue-draggable.drag-over").forEach(el => el.classList.remove("drag-over"));
+}
+
+async function onDropQueueItem(e, targetId){
+  e.preventDefault();
+  e.currentTarget.classList.remove("drag-over");
+  if(!draggedIngresoId || draggedIngresoId === targetId) return;
+
+  // Orden actual tal como se ve en pantalla ahora mismo
+  const ids = [...document.querySelectorAll("#board .queue-draggable")].map(el => el.dataset.id);
+  const fromIdx = ids.indexOf(draggedIngresoId);
+  const toIdx = ids.indexOf(targetId);
+  if(fromIdx === -1 || toIdx === -1) return;
+
+  ids.splice(fromIdx, 1);
+  ids.splice(toIdx, 0, draggedIngresoId);
+
+  const ordenes = ids.map((id, idx) => ({ id, orden: idx + 1 }));
+  draggedIngresoId = null;
+
+  try{
+    await enviarAccion({ accion: "actualizarOrdenIngresos", ordenes });
+    await cargarDatos();
+  }catch(err){
+    alert("No se pudo reordenar: " + err.message);
+  }
+}
+
+function toggleExpandido(id){
+  if(expandidos.has(id)) expandidos.delete(id);
+  else expandidos.add(id);
+  render();
+}
+
+function compactHTML(i){
+  const plantClass = i.planta === "Mónaco" ? "plant-monaco" : "plant-virgen";
+  const cer = estiloCereal(i.cereal);
+  const etapaActual = STAGES[i.estado];
+  const abierto = expandidos.has(i.id);
+
+  const detalle = abierto ? `
+    <div class="compact-detalle">
+      <div class="meta-row">
+        <div class="meta-item"><span class="label">Fecha</span><span class="value mono">${i.fecha || "—"}</span></div>
+        <div class="meta-item"><span class="label">Chofer</span><span class="value">${i.chofer}</span></div>
+        <div class="meta-item"><span class="label">Dominio</span><span class="value mono">${i.dominio}</span></div>
+        <div class="meta-item"><span class="label">ID</span><span class="value mono">${i.id}</span></div>
+      </div>
+      <div class="pipeline">${pipelineHTML(i)}</div>
+      ${i.parcial ? `<div class="parcial-note">⇄ Descargó parcial en ${i.plantaParcial}${i.cantidadParcial ? " — " + i.cantidadParcial : ""}</div>` : ""}
+      ${i.obs ? `<div class="parcial-note" style="background:var(--panel-2);color:var(--ink-soft)">📝 ${i.obs}</div>` : ""}
+      <div class="card-actions">${actionsHTML(i)}</div>
+    </div>
+  ` : "";
+
+  return `
+    <div class="compact-row${i.queueNum ? " queue-draggable" : ""}"${i.queueNum ? ` draggable="true" data-id="${i.id}" ondragstart="dragStartIngreso(event,'${i.id}')" ondragend="dragEndIngreso(event)" ondragover="event.preventDefault()" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="onDropQueueItem(event,'${i.id}')"` : ""}>
+      <div class="compact-summary" onclick="toggleExpandido('${i.id}')">
+        ${i.queueNum ? `<span class="drag-handle" title="Arrastrá para reordenar">⠿</span><span class="queue-badge">${i.queueNum}º</span>` : ""}
+        <span class="cereal-badge" style="background:${cer.bg}; color:${cer.color}; min-width:34px; text-align:center;">${cer.emoji}</span>
+        <div class="compact-main">
+          <span class="compact-cliente">${i.cliente}</span>
+          <span class="compact-campo">${i.campo}</span>
+          <span class="compact-chofer">${i.chofer}</span>
+        </div>
+        <span class="compact-etapa" style="background:${COLOR_POR_ETAPA[i.estado].s}; color:${COLOR_POR_ETAPA[i.estado].c}; padding:3px 8px; border-radius:5px; font-weight:600;">${etapaActual}</span>
+        ${i.parcial ? `<span class="compact-etapa" style="background:var(--purga-soft); color:var(--purga);">🔄 Purgado</span>` : ""}
+        ${i.humedad ? `<span class="compact-humedad">H: ${i.humedad}%</span>` : ""}
+        <span class="plant-tag ${plantClass}">${i.planta}</span>
+        <span class="compact-caret">${abierto ? "▲" : "▼"}</span>
+      </div>
+      ${detalle}
+    </div>
+  `;
+}
+
+/* ---------- Acciones ---------- */
+async function avanzar(id){
+  const ing = ingresos.find(x=>x.id===id);
+  let humedad;
+
+  // Si está pasando de Arribo (1) a Calado (2), pedimos la humedad medida
+  if(ing && ing.estado === 1){
+    humedad = prompt("Humedad medida (%):", "");
+    if(humedad === null) return; // canceló, no avanza el estado
+  }
+
+  try{
+    await enviarAccion({ accion: "avanzar", id, humedad });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo avanzar el estado: " + err.message); }
+}
+
+async function retroceder(id){
+  const ing = ingresos.find(x=>x.id===id);
+  if(!ing || ing.estado <= 0) return;
+
+  const etapaAnterior = STAGES[ing.estado - 1];
+  let advertencia = "";
+  if(ing.estado - 1 < 1) advertencia = " Se borra la hora de Arribo.";
+  if(ing.estado - 1 < 2) advertencia = " Se borran la hora de Calado y la humedad cargada.";
+  if(ing.estado - 1 < 4 && ing.estado === 4) advertencia = " Se borra la hora de Finalizado.";
+
+  const ok = confirm(`¿Volver el ingreso ${id} a la etapa "${etapaAnterior}"?${advertencia}`);
+  if(!ok) return;
+
+  try{
+    await enviarAccion({ accion: "retroceder", id });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo retroceder el estado: " + err.message); }
+}
+
+async function togglePlanta(id){
+  const ing = ingresos.find(x=>x.id===id);
+  if(!ing) return;
+  try{
+    if(ing.parcial){
+      await enviarAccion({ accion: "quitarParcial", id });
+      await cargarDatos();
+      return;
+    }
+    const otra = ing.planta === "Mónaco" ? "La Virgen" : "Mónaco";
+    const cantidad = prompt(`¿Cuánto descargó ya en Planta ${otra}? (ej: 10.000 kg)`);
+    if(cantidad === null) return;
+    await enviarAccion({ accion: "marcarParcial", id, plantaParcial: otra, cantidadParcial: cantidad });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo actualizar: " + err.message); }
+}
+
+async function editarObs(id){
+  const ing = ingresos.find(x=>x.id===id);
+  if(!ing) return;
+  const nueva = prompt("Observaciones:", ing.obs || "");
+  if(nueva === null) return;
+  try{
+    await enviarAccion({ accion: "editarObservaciones", id, observaciones: nueva });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo guardar la observación: " + err.message); }
+}
+
+/* ---------- Modal / alta y edición ---------- */
+let editandoId = null; // null = modo alta. Con valor = modo edición de ese ingreso.
+
+function openModal(){
+  editandoId = null;
+  document.getElementById("modalTitulo").textContent = "Nuevo ingreso";
+  document.getElementById("modalHint").textContent = "Cargá los datos del camión que llega a descargar. El cupo no aplica acá — es solo para egresos.";
+  document.getElementById("modalBtnGuardar").textContent = "Registrar ingreso";
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function editarIngresoUI(id){
+  const ing = ingresos.find(x=>x.id===id);
+  if(!ing) return;
+
+  editandoId = id;
+  document.getElementById("modalTitulo").textContent = "Editar ingreso · " + id;
+  document.getElementById("modalHint").textContent = "Corregí los datos que hagan falta. El estado y los horarios no se tocan acá.";
+  document.getElementById("modalBtnGuardar").textContent = "Guardar cambios";
+
+  document.getElementById("fCliente").value = ing.cliente;
+  document.getElementById("fCampo").value = ing.campo;
+  document.getElementById("fCereal").value = ing.cereal;
+  document.getElementById("fPlanta").value = ing.planta;
+  document.getElementById("fChofer").value = ing.chofer === "—" ? "" : ing.chofer;
+  document.getElementById("fDominio").value = ing.dominio === "—" ? "" : ing.dominio;
+  document.getElementById("fObs").value = ing.obs || "";
+  actualizarCamposDatalist();
+
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function closeModal(){
+  document.getElementById("modalOverlay").classList.remove("open");
+  ["fCliente","fCampo","fCereal","fChofer","fDominio","fObs"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("choferNuevoAviso").style.display = "none";
+  document.getElementById("clienteNuevoAviso").style.display = "none";
+  editandoId = null;
+}
+
+function onChoferChange(){
+  const nombre = document.getElementById("fChofer").value.trim();
+  const t = TRANSPORTES.find(x=>x.chofer.toLowerCase()===nombre.toLowerCase());
+  const aviso = document.getElementById("choferNuevoAviso");
+
+  if(t){
+    document.getElementById("fDominio").value = `${t.dominioChasis} / ${t.dominioAcoplado}`;
+    aviso.style.display = "none";
+  }else{
+    aviso.style.display = nombre.length > 2 ? "block" : "none";
+  }
+}
+
+async function guardarModal(){
+  const cliente = document.getElementById("fCliente").value;
+  if(!cliente){ alert("Elegí un cliente antes de guardar."); return; }
+
+  const boton = document.getElementById("modalBtnGuardar");
+  const textoOriginal = boton.textContent;
+  boton.textContent = "Guardando…";
+  boton.disabled = true;
+
+  const datos = {
+    cliente,
+    campo: document.getElementById("fCampo").value,
+    cereal: document.getElementById("fCereal").value,
+    chofer: document.getElementById("fChofer").value,
+    dominio: document.getElementById("fDominio").value,
+    planta: document.getElementById("fPlanta").value,
+    observaciones: document.getElementById("fObs").value,
+  };
+
+  try{
+    if(editandoId){
+      await enviarAccion({ accion: "editarIngreso", id: editandoId, ...datos });
+    }else{
+      await enviarAccion({ accion: "crear", ...datos });
+    }
+    closeModal();
+    await cargarDatos();
+  }catch(err){
+    alert("No se pudo guardar: " + err.message);
+  }finally{
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+  }
+}
+
+async function borrarIngresoUI(id){
+  const ing = ingresos.find(x=>x.id===id);
+  if(!ing) return;
+
+  const ok = confirm(`¿Borrar el ingreso ${id} (${ing.cliente})?\n\nEsta acción no se puede deshacer.`);
+  if(!ok) return;
+
+  try{
+    await enviarAccion({ accion: "borrarIngreso", id });
+    await cargarDatos();
+  }catch(err){
+    alert("No se pudo borrar: " + err.message);
+  }
+}
+
+/* ---------- Nuevo cliente ---------- */
+function onClienteChange(){
+  const nombre = document.getElementById("fCliente").value.trim();
+  const existe = CLIENTES.some(c => c.cliente.toLowerCase() === nombre.toLowerCase());
+  document.getElementById("clienteNuevoAviso").style.display = (!existe && nombre.length > 2) ? "block" : "none";
+}
+
+function abrirNuevoCliente(soloAgregarCampo){
+  const clienteActual = document.getElementById("fCliente").value.trim();
+
+  if(soloAgregarCampo && !clienteActual){
+    alert("Primero escribí o elegí el cliente al que le querés agregar un campo.");
+    return;
+  }
+
+  if(soloAgregarCampo){
+    document.getElementById("clienteModalTitulo").textContent = "Agregar campo a " + clienteActual;
+    document.getElementById("clienteModalHint").textContent = "Se guarda como un campo más de este cliente, sin tocar los que ya tiene cargados.";
+  }else{
+    document.getElementById("clienteModalTitulo").textContent = "Nuevo cliente";
+    document.getElementById("clienteModalHint").textContent = "Cargá el campo y los km si los tenés a mano. Si tiene más de un campo, podés repetir esto luego con otro campo distinto para el mismo cliente.";
+  }
+
+  document.getElementById("cNombreCliente").value = clienteActual;
+  document.getElementById("cCampo").value = soloAgregarCampo ? "" : document.getElementById("fCampo").value.trim();
+  document.getElementById("cKm").value = "";
+  document.getElementById("clienteOverlay").classList.add("open");
+}
+
+function closeNuevoCliente(){
+  document.getElementById("clienteOverlay").classList.remove("open");
+}
+
+async function guardarNuevoCliente(){
+  const cliente = document.getElementById("cNombreCliente").value.trim();
+  if(!cliente){ alert("Falta el nombre del cliente."); return; }
+
+  const boton = document.getElementById("clienteBtnGuardar");
+  const textoOriginal = boton.textContent;
+  boton.textContent = "Guardando…";
+  boton.disabled = true;
+
+  try{
+    const resultado = await enviarAccion({
+      accion: "crearCliente",
+      cliente,
+      campo: document.getElementById("cCampo").value,
+      km: document.getElementById("cKm").value,
+    });
+
+    closeNuevoCliente();
+    await cargarDatos(); // refresca CLIENTES y el datalist
+
+    document.getElementById("fCliente").value = resultado.cliente;
+    document.getElementById("fCampo").value = resultado.campo;
+    document.getElementById("clienteNuevoAviso").style.display = "none";
+    actualizarCamposDatalist();
+  }catch(err){
+    alert("No se pudo guardar el cliente: " + err.message);
+  }finally{
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+  }
+}
+
+/* ---------- Nuevo transporte ---------- */
+function abrirNuevoTransporte(){
+  const nombreTipeado = document.getElementById("fChofer").value.trim();
+  document.getElementById("tNombreChofer").value = nombreTipeado;
+  document.getElementById("tCuitChofer").value = "";
+  document.getElementById("tNombreTransporte").value = "";
+  document.getElementById("tCuitTransporte").value = "";
+  document.getElementById("tDominioChasis").value = "";
+  document.getElementById("tDominioAcoplado").value = "";
+  document.getElementById("tEscalable").value = "NO";
+  document.getElementById("tPesoBruto").value = "";
+  document.getElementById("transporteOverlay").classList.add("open");
+}
+
+function closeNuevoTransporte(){
+  document.getElementById("transporteOverlay").classList.remove("open");
+}
+
+async function guardarNuevoTransporte(){
+  const nombreChofer = document.getElementById("tNombreChofer").value.trim();
+  if(!nombreChofer){ alert("Falta el nombre del chofer."); return; }
+
+  const boton = document.getElementById("transporteBtnGuardar");
+  const textoOriginal = boton.textContent;
+  boton.textContent = "Guardando…";
+  boton.disabled = true;
+
+  try{
+    const resultado = await enviarAccion({
+      accion: "crearTransporte",
+      nombreChofer,
+      cuitChofer: document.getElementById("tCuitChofer").value,
+      nombreTransporte: document.getElementById("tNombreTransporte").value,
+      cuitTransporte: document.getElementById("tCuitTransporte").value,
+      dominioChasis: document.getElementById("tDominioChasis").value,
+      dominioAcoplado: document.getElementById("tDominioAcoplado").value,
+      escalable: document.getElementById("tEscalable").value,
+      pesoBrutoMaximo: document.getElementById("tPesoBruto").value,
+    });
+
+    closeNuevoTransporte();
+    await cargarDatos(); // refresca TRANSPORTES y el datalist
+
+    // Vuelve a completar el chofer/dominio en el modal de ingreso con lo recién creado
+    document.getElementById("fChofer").value = resultado.chofer;
+    document.getElementById("fDominio").value = resultado.dominio;
+    document.getElementById("choferNuevoAviso").style.display = "none";
+  }catch(err){
+    alert("No se pudo guardar el transporte: " + err.message);
+  }finally{
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+  }
+}
+
+/* ---------- Mantenimiento / limpieza manual ---------- */
+let mantTipo = "ingresos";
+
+function openMantenimiento(tipo){
+  mantTipo = tipo || "ingresos";
+  const hoy = new Date().toISOString().slice(0, 10);
+  const hace30 = new Date(Date.now() - 30*24*60*60*1000).toISOString().slice(0, 10);
+  document.getElementById("mFechaDesde").value = hace30;
+  document.getElementById("mFechaHasta").value = hoy;
+  document.getElementById("mantPreview").textContent = "";
+  document.querySelector("#mantOverlay h2").textContent =
+    mantTipo === "egresos" ? "Limpiar egresos finalizados" : "Limpiar ingresos finalizados";
+  document.getElementById("mantOverlay").classList.add("open");
+}
+
+function closeMantenimiento(){
+  document.getElementById("mantOverlay").classList.remove("open");
+}
+
+function leerRangoMantenimiento(){
+  const desde = document.getElementById("mFechaDesde").value;
+  const hasta = document.getElementById("mFechaHasta").value;
+  if(!desde || !hasta){
+    alert("Elegí ambas fechas.");
+    return null;
+  }
+  if(desde > hasta){
+    alert("La fecha 'Desde' no puede ser posterior a 'Hasta'.");
+    return null;
+  }
+  return { fechaDesde: desde, fechaHasta: hasta };
+}
+
+async function previsualizarLimpiezaUI(){
+  const rango = leerRangoMantenimiento();
+  if(!rango) return;
+  const preview = document.getElementById("mantPreview");
+  preview.textContent = "Consultando…";
+  const accion = mantTipo === "egresos" ? "previsualizarLimpiezaEgresos" : "previsualizarLimpieza";
+  const sustantivo = mantTipo === "egresos" ? "egreso" : "ingreso";
+  try{
+    const resultado = await enviarAccion({ accion, ...rango });
+    preview.textContent = resultado.cantidad === 0
+      ? `No hay ${sustantivo}s Finalizados en ese rango. No hay nada para borrar.`
+      : `Se borrarían ${resultado.cantidad} ${sustantivo}(s) Finalizado(s) en ese rango.`;
+  }catch(err){
+    preview.textContent = "Error al consultar: " + err.message;
+  }
+}
+
+async function confirmarLimpieza(){
+  const rango = leerRangoMantenimiento();
+  if(!rango) return;
+
+  const accion = mantTipo === "egresos" ? "limpiarRangoEgresos" : "limpiarRango";
+  const sustantivo = mantTipo === "egresos" ? "egreso" : "ingreso";
+
+  const ok = confirm(
+    `¿Confirmás borrar los ${sustantivo}s Finalizados entre ${rango.fechaDesde} y ${rango.fechaHasta}?\n\nEsta acción no se puede deshacer.`
+  );
+  if(!ok) return;
+
+  try{
+    const resultado = await enviarAccion({ accion, ...rango });
+    alert(`Se borraron ${resultado.borrados} ${sustantivo}(s).`);
+    closeMantenimiento();
+    await cargarDatos();
+  }catch(err){
+    alert("No se pudo completar la limpieza: " + err.message);
+  }
+}
+
+/* ============================================================
+   EGRESOS — cupos pendientes para cargar + camiones cargando
+   ============================================================ */
+
+let vistaModoEgreso = "tarjetas";
+let corredorFiltro = "Todos";
+let destinoFiltro = "Todos";
+let cerealFiltroEgreso = "Todos";
+let rangoPendientes = "hoy";
+let expandidosEgreso = new Set();
+
+function codigosCupoAsignados(){
+  return new Set(egresos.map(eg => eg.codigoCupo).filter(Boolean));
+}
+
+/* Convierte "dd/MM/yyyy" a Date. Si no matchea el formato, devuelve null. */
+function parseFechaDDMMYYYY(str){
+  if(!str) return null;
+  const partes = String(str).split("/");
+  if(partes.length !== 3) return null;
+  const [d, m, y] = partes.map(n => parseInt(n, 10));
+  if(!d || !m || !y) return null;
+  return new Date(y, m - 1, d);
+}
+
+function fechaEnRango(fechaStr, rango){
+  if(rango === "todos") return true;
+  const fecha = parseFechaDDMMYYYY(fechaStr);
+  if(!fecha) return true; // sin fecha parseable, no la ocultamos
+
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+  const f = new Date(fecha); f.setHours(0,0,0,0);
+
+  if(rango === "hoy"){
+    return f.getTime() === hoy.getTime();
+  }
+  if(rango === "semana"){
+    const inicioSemana = new Date(hoy);
+    const diaSemana = (hoy.getDay() + 6) % 7; // lunes = 0
+    inicioSemana.setDate(hoy.getDate() - diaSemana);
+    const finSemana = new Date(inicioSemana);
+    finSemana.setDate(inicioSemana.getDate() + 6);
+    return f >= inicioSemana && f <= finSemana;
+  }
+  return true;
+}
+
+function poblarFiltrosEgreso(cerealParaFiltrarCupo){
+  // Corredores y destinos: de la hoja maestra + los que ya aparecen en cupos/egresos
+  const corredores = new Set(CORREDORES);
+  const destinos = new Set(DESTINOS);
+  cupos.forEach(c => { if(c.corredor) corredores.add(c.corredor); if(c.destino) destinos.add(c.destino); });
+  egresos.forEach(eg => { if(eg.corredor) corredores.add(eg.corredor); if(eg.destino) destinos.add(eg.destino); });
+
+  const corredorSel = document.getElementById("corredorFiltro");
+  const corredorActual = corredorSel.value;
+  corredorSel.innerHTML = '<option value="Todos">Todos los corredores</option>' +
+    [...corredores].sort().map(c => `<option value="${c}">${c}</option>`).join("");
+  if([...corredores].includes(corredorActual)) corredorSel.value = corredorActual;
+
+  const destinoSel = document.getElementById("destinoFiltro");
+  const destinoActual = destinoSel.value;
+  destinoSel.innerHTML = '<option value="Todos">Todos los destinos</option>' +
+    [...destinos].sort().map(d => `<option value="${d}">${d}</option>`).join("");
+  if([...destinos].includes(destinoActual)) destinoSel.value = destinoActual;
+
+  const dlCorredor = document.getElementById("corredorListDL");
+  if(dlCorredor) dlCorredor.innerHTML = [...corredores].sort().map(c=>`<option value="${c}"></option>`).join("");
+  const dlDestino = document.getElementById("destinoListDL");
+  if(dlDestino) dlDestino.innerHTML = [...destinos].sort().map(d=>`<option value="${d}"></option>`).join("");
+
+  // Cupos pendientes, para el datalist del modal (opcionalmente filtrados por cereal)
+  const asignados = codigosCupoAsignados();
+  let pend = cupos.filter(c => !asignados.has(c.codigoCupo));
+  if(cerealParaFiltrarCupo){
+    pend = pend.filter(c => c.cereal === cerealParaFiltrarCupo);
+  }
+  const dlCupo = document.getElementById("cupoPendienteDL");
+  if(dlCupo) dlCupo.innerHTML = pend.map(c => `<option value="${c.codigoCupo}">${c.cliente} — ${c.cereal}</option>`).join("");
+}
+
+function poblarCerealTabsEgreso(){
+  const cerealesPresentes = [...new Set([...cupos.map(c=>c.cereal), ...egresos.map(eg=>eg.cereal)].filter(Boolean))].sort();
+  const cont = document.getElementById("cerealTabsEgreso");
+  if(!cont) return;
+  const activo = cerealFiltroEgreso;
+
+  let html = `<button class="tab cereal-chip ${activo==="Todos" ? "active" : ""}" data-cereal="Todos">Todos</button>`;
+  cerealesPresentes.forEach(nombre => {
+    const c = estiloCereal(nombre);
+    const isActive = activo === nombre;
+    html += `<button class="tab cereal-chip ${isActive ? "active" : ""}" data-cereal="${nombre}" style="${isActive ? `background:${c.color};border-color:${c.color};color:#fff;` : ""}">${c.emoji} ${nombre}</button>`;
+  });
+  cont.innerHTML = html;
+
+  cont.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      cerealFiltroEgreso = btn.dataset.cereal;
+      poblarCerealTabsEgreso();
+      renderEgresos();
+    });
+  });
+}
+
+function renderEgresos(){
+  if(!document.getElementById("cuposPendientes")) return;
+
+  poblarFiltrosEgreso();
+  poblarCerealTabsEgreso();
+
+  const asignados = codigosCupoAsignados();
+  const busqueda = (document.getElementById("buscadorEgreso").value || "").trim().toLowerCase();
+
+  const pasaFiltrosComunes = (item) => {
+    if(corredorFiltro !== "Todos" && item.corredor !== corredorFiltro) return false;
+    if(destinoFiltro !== "Todos" && item.destino !== destinoFiltro) return false;
+    if(cerealFiltroEgreso !== "Todos" && item.cereal !== cerealFiltroEgreso) return false;
+    if(busqueda){
+      const coincide = (item.cliente || "").toLowerCase().includes(busqueda) ||
+                        (item.chofer || "").toLowerCase().includes(busqueda);
+      if(!coincide) return false;
+    }
+    return true;
+  };
+
+  // ---- Cupos pendientes ----
+  let pendientes = cupos.filter(c => !asignados.has(c.codigoCupo));
+  pendientes = pendientes.filter(pasaFiltrosComunes);
+  pendientes = pendientes.filter(c => fechaEnRango(c.fecha, rangoPendientes));
+  renderCuposPendientes(pendientes);
+
+  // ---- Camiones cargando ----
+  let enProceso = egresos.filter(eg => eg.estado < 3);
+  enProceso = enProceso.filter(eg => plantaFiltroEgreso === "Todas" || eg.planta === plantaFiltroEgreso);
+  enProceso = enProceso.filter(eg => origenFiltroEgreso === "Todos" || eg.origen === origenFiltroEgreso);
+  enProceso = enProceso.filter(pasaFiltrosComunes);
+
+  document.getElementById("countsEgreso").innerHTML = `
+    <span class="count-pill">Pendientes: ${pendientes.length}</span>
+    <span class="count-pill">Cargando: ${enProceso.length}</span>
+    <span class="count-pill">Finalizados hoy: ${egresos.filter(eg=>eg.estado===3).length}</span>
+  `;
+
+  // ---- Camiones cargados (Finalizados) ----
+  let finalizados = egresos.filter(eg => eg.estado === 3);
+  finalizados = finalizados.filter(eg => plantaFiltroEgreso === "Todas" || eg.planta === plantaFiltroEgreso);
+  finalizados = finalizados.filter(eg => origenFiltroEgreso === "Todos" || eg.origen === origenFiltroEgreso);
+  finalizados = finalizados.filter(pasaFiltrosComunes);
+
+  const tabCupos = document.querySelector('#subVistaEgresoTabs [data-subvista="cupos"]');
+  const tabCamiones = document.querySelector('#subVistaEgresoTabs [data-subvista="camiones"]');
+  const tabFinalizados = document.querySelector('#subVistaEgresoTabs [data-subvista="finalizados"]');
+  if(tabCupos) tabCupos.textContent = `📋 Cupos (${pendientes.length})`;
+  if(tabCamiones) tabCamiones.textContent = `🚛 Camiones cargando (${enProceso.length})`;
+  if(tabFinalizados) tabFinalizados.textContent = `✅ Camiones cargados (${finalizados.length})`;
+
+  const boardEg = document.getElementById("boardEgresos");
+  if(enProceso.length === 0){
+    boardEg.innerHTML = `<div class="empty-state">No hay camiones cargando en este momento.</div>`;
+  }else{
+    const renderer = vistaModoEgreso === "compacta" ? compactEgresoHTML : cardEgresoHTML;
+    boardEg.innerHTML = enProceso.map(renderer).join("");
+  }
+
+  const boardFin = document.getElementById("boardEgresosFinalizados");
+  if(boardFin){
+    if(finalizados.length === 0){
+      boardFin.innerHTML = `<div class="empty-state">No hay camiones cargados con estos filtros.</div>`;
+    }else{
+      const renderer = vistaModoEgreso === "compacta" ? compactEgresoHTML : cardEgresoHTML;
+      boardFin.innerHTML = finalizados
+        .sort((a,b) => (b.horaFin||"").localeCompare(a.horaFin||""))
+        .map(renderer).join("");
+    }
+  }
+}
+
+function renderCuposPendientes(pendientes){
+  const cont = document.getElementById("cuposPendientes");
+  if(pendientes.length === 0){
+    cont.innerHTML = `<div class="empty-state">No hay cupos pendientes con estos filtros.</div>`;
+    return;
+  }
+
+  const porDia = {};
+  pendientes.forEach(c => {
+    const dia = c.dia || c.fecha || "Sin fecha";
+    (porDia[dia] = porDia[dia] || []).push(c);
+  });
+
+  let html = "";
+  Object.keys(porDia).forEach(dia => {
+    html += `<div class="cupo-dia-header">${dia} <span style="color:var(--gold);">(${porDia[dia].length})</span></div>`;
+
+    const porCereal = {};
+    porDia[dia].forEach(c => {
+      (porCereal[c.cereal || "Sin cereal"] = porCereal[c.cereal || "Sin cereal"] || []).push(c);
+    });
+
+    Object.keys(porCereal).forEach(cerealNombre => {
+      const cer = estiloCereal(cerealNombre);
+      html += `<div class="cupo-cereal-group">
+        <div class="cupo-cereal-label" style="background:${cer.bg};color:${cer.color};">${cer.emoji} ${cerealNombre} · ${porCereal[cerealNombre].length}</div>`;
+
+      porCereal[cerealNombre].forEach(c => {
+        html += `
+          <div class="cupo-row">
+            <div class="cupo-row-main">
+              <span class="cupo-cliente">${c.cliente || "—"}</span>
+              <span class="cupo-detalle"><strong>Corredor:</strong> ${c.corredor || "—"} &nbsp;·&nbsp; <strong>Destino:</strong> ${c.destino || "—"}</span>
+            </div>
+            <span class="cupo-codigo">${c.codigoCupo}</span>
+            <button class="btn-ghost advance" onclick="abrirAsignarCamion('${c.codigoCupo}')">Asignar camión</button>
+            <button class="btn-ghost link" onclick="abrirEditarCupo('${c.codigoCupo}')">Editar</button>
+            <button class="btn-ghost link" style="color:var(--rust);" onclick="borrarCupoUI('${c.codigoCupo}')">Borrar</button>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+    });
+  });
+
+  cont.innerHTML = html;
+}
+
+function pipelineEgresoHTML(eg){
+  const ultimaEtapa = STAGES_EGRESO.length - 1;
+  return STAGES_EGRESO.map((s, idx)=>{
+    let cls = "stage";
+    let estiloExtra = "";
+    if(idx < eg.estado || (idx === eg.estado && idx === ultimaEtapa)) cls += " done";
+    else if(idx === eg.estado){
+      cls += " current";
+      const col = COLOR_POR_ETAPA_EGRESO[idx];
+      estiloExtra = ` style="--color-etapa:${col.c};--color-etapa-soft:${col.s};"`;
+    }
+    const time = idx===1 ? eg.horaArribo : idx===2 ? eg.horaCargando : idx===3 ? eg.horaFin : "";
+    return `<div class="${cls}"${estiloExtra}><div class="dot"></div><div class="lbl">${s}</div><div class="time">${time||""}</div></div>`;
+  }).join("");
+}
+
+function actionsEgresoHTML(eg){
+  let actions = "";
+  if(eg.estado > 0){
+    actions += `<button class="btn-ghost" onclick="retrocederEgreso('${eg.id}')">← Volver a ${STAGES_EGRESO[eg.estado-1]}</button>`;
+  }
+  if(eg.estado < 3){
+    const esUltimoPaso = eg.estado === 2;
+    const etiqueta = (esUltimoPaso && !eg.codigoCupo) ? "Finalizar y asignar cupo" : `Avanzar a ${STAGES_EGRESO[eg.estado+1]}`;
+    actions += `<button class="btn-ghost advance" onclick="avanzarEgreso('${eg.id}')">${etiqueta}</button>`;
+  }
+  actions += `<button class="btn-ghost link" onclick="editarEgresoUI('${eg.id}')">Editar datos</button>`;
+  if(eg.chofer && eg.chofer !== "—"){
+    actions += `<button class="btn-ghost link" onclick="compartirTransporte('${eg.chofer}')">📤 Compartir transporte</button>`;
+  }
+  actions += `<button class="btn-ghost link" style="color:var(--rust);" onclick="borrarEgresoUI('${eg.id}')">Borrar</button>`;
+  return actions;
+}
+
+function cardEgresoHTML(eg){
+  const plantClass = eg.planta === "Mónaco" ? "plant-monaco" : "plant-virgen";
+  const cer = estiloCereal(eg.cereal);
+  const esCampo = eg.origen === "Campo";
+  const origenTag = esCampo ? "🌾 Campo" : "🏭 Acopio";
+  const sinCupo = !eg.codigoCupo;
+
+  return `
+    <div class="card">
+      <div class="card-top">
+        <div class="card-title">
+          <span class="cliente">${sinCupo ? "Sin cupo asignado" : eg.cliente}</span>
+          <span class="campo">${eg.fecha || ""}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          ${eg.cereal ? `<span class="cereal-badge" style="background:${cer.bg}; color:${cer.color};">${cer.emoji} ${eg.cereal}</span>` : ""}
+          <span class="plant-tag ${plantClass}">${eg.planta}</span>
+        </div>
+      </div>
+
+      ${sinCupo ? `<div class="parcial-note" style="background:var(--amber-soft);color:#8A5A17;">⏳ Todavía sin cupo — se asigna al llegar a Finalizado</div>` : ""}
+
+      <div class="egreso-ruta">
+        <div class="egreso-ruta-item">
+          <span class="egreso-ruta-label">Corredor</span>
+          <span class="egreso-ruta-valor">${eg.corredor || "—"}</span>
+        </div>
+        <span class="egreso-ruta-flecha">→</span>
+        <div class="egreso-ruta-item">
+          <span class="egreso-ruta-label">Destino</span>
+          <span class="egreso-ruta-valor">${eg.destino || "—"}</span>
+        </div>
+        <span class="egreso-ruta-origen ${esCampo ? "campo" : "acopio"}">${origenTag}</span>
+      </div>
+
+      <div class="meta-row">
+        <div class="meta-item"><span class="label">Chofer</span><span class="value">${eg.chofer}</span></div>
+        <div class="meta-item"><span class="label">Dominio</span><span class="value mono">${eg.dominio}</span></div>
+        <div class="meta-item"><span class="label">Cupo</span><span class="value mono">${eg.codigoCupo || "—"}</span></div>
+      </div>
+
+      <div class="pipeline">${pipelineEgresoHTML(eg)}</div>
+      ${eg.obs ? `<div class="parcial-note" style="background:var(--panel-2);color:var(--ink-soft)">📝 ${eg.obs}</div>` : ""}
+
+      <div class="card-actions">${actionsEgresoHTML(eg)}</div>
+    </div>
+  `;
+}
+
+function toggleExpandidoEgreso(id){
+  if(expandidosEgreso.has(id)) expandidosEgreso.delete(id);
+  else expandidosEgreso.add(id);
+  renderEgresos();
+}
+
+function compactEgresoHTML(eg){
+  const plantClass = eg.planta === "Mónaco" ? "plant-monaco" : "plant-virgen";
+  const cer = estiloCereal(eg.cereal);
+  const etapaActual = STAGES_EGRESO[eg.estado];
+  const abierto = expandidosEgreso.has(eg.id);
+  const origenTag = eg.origen === "Campo" ? "🌾" : "🏭";
+
+  const detalle = abierto ? `
+    <div class="compact-detalle">
+      <div class="meta-row">
+        <div class="meta-item"><span class="label">Fecha</span><span class="value mono">${eg.fecha || "—"}</span></div>
+        <div class="meta-item"><span class="label">Corredor</span><span class="value">${eg.corredor || "—"}</span></div>
+        <div class="meta-item"><span class="label">Destino</span><span class="value">${eg.destino || "—"}</span></div>
+        <div class="meta-item"><span class="label">Dominio</span><span class="value mono">${eg.dominio}</span></div>
+        <div class="meta-item"><span class="label">Cupo</span><span class="value mono">${eg.codigoCupo || "—"}</span></div>
+      </div>
+      <div class="pipeline">${pipelineEgresoHTML(eg)}</div>
+      ${eg.obs ? `<div class="parcial-note" style="background:var(--panel-2);color:var(--ink-soft)">📝 ${eg.obs}</div>` : ""}
+      <div class="card-actions">${actionsEgresoHTML(eg)}</div>
+    </div>
+  ` : "";
+
+  return `
+    <div class="compact-row">
+      <div class="compact-summary" onclick="toggleExpandidoEgreso('${eg.id}')">
+        <span class="cereal-badge" style="background:${cer.bg}; color:${cer.color}; min-width:34px; text-align:center;">${cer.emoji}</span>
+        <div class="compact-main">
+          <span class="compact-cliente">${eg.codigoCupo ? eg.cliente : "Sin cupo asignado"}</span>
+          <span class="compact-campo">${origenTag} ${eg.origen || ""}</span>
+          <span class="compact-chofer">${eg.chofer}</span>
+        </div>
+        <span class="compact-etapa" style="background:${COLOR_POR_ETAPA_EGRESO[eg.estado].s}; color:${COLOR_POR_ETAPA_EGRESO[eg.estado].c}; padding:3px 8px; border-radius:5px; font-weight:600;">${etapaActual}</span>
+        <span class="plant-tag ${plantClass}">${eg.planta}</span>
+        <span class="compact-caret">${abierto ? "▲" : "▼"}</span>
+      </div>
+      ${detalle}
+    </div>
+  `;
+}
+
+/* ---------- Acciones de Egresos ---------- */
+let egresoIdParaFinalizar = null;
+
+async function avanzarEgreso(id){
+  const eg = egresos.find(x=>x.id===id);
+  if(!eg) return;
+
+  // Pasando de Cargando (2) a Finalizado (3)
+  if(eg.estado === 2){
+    if(!eg.codigoCupo){
+      // No tiene cupo asignado todavía: abrimos el modal para elegirlo + carta de porte
+      egresoIdParaFinalizar = id;
+      document.getElementById("finCodigoCupo").value = "";
+      document.getElementById("finCartaPorte").value = "";
+      poblarFiltrosEgreso();
+      document.getElementById("finalizarOverlay").classList.add("open");
+      return;
+    }else{
+      const cp = prompt("Carta de porte (opcional):", "");
+      if(cp === null) return; // canceló
+      try{
+        await enviarAccion({ accion: "avanzarEgreso", id, cartaPorte: cp });
+        await cargarDatos();
+      }catch(err){ alert("No se pudo finalizar: " + err.message); }
+      return;
+    }
+  }
+
+  try{
+    await enviarAccion({ accion: "avanzarEgreso", id });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo avanzar el estado: " + err.message); }
+}
+
+function closeFinalizarModal(){
+  document.getElementById("finalizarOverlay").classList.remove("open");
+  egresoIdParaFinalizar = null;
+}
+
+async function confirmarFinalizarEgreso(){
+  const codigoCupo = document.getElementById("finCodigoCupo").value.trim();
+  const cartaPorte = document.getElementById("finCartaPorte").value.trim();
+
+  if(!codigoCupo){ alert("Elegí a qué cupo corresponde esta carga."); return; }
+  if(!cupos.some(c => c.codigoCupo === codigoCupo)){
+    alert("Ese código de cupo no existe en la hoja Cupos.");
+    return;
+  }
+
+  const boton = document.getElementById("finalizarBtnGuardar");
+  const textoOriginal = boton.textContent;
+  boton.textContent = "Guardando…";
+  boton.disabled = true;
+
+  try{
+    await enviarAccion({ accion: "avanzarEgreso", id: egresoIdParaFinalizar, codigoCupo, cartaPorte });
+    closeFinalizarModal();
+    await cargarDatos();
+  }catch(err){
+    alert("No se pudo finalizar: " + err.message);
+  }finally{
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+  }
+}
+
+async function retrocederEgreso(id){
+  const eg = egresos.find(x=>x.id===id);
+  if(!eg || eg.estado <= 0) return;
+  const ok = confirm(`¿Volver el camión de ${eg.cliente} a la etapa "${STAGES_EGRESO[eg.estado-1]}"?`);
+  if(!ok) return;
+  try{
+    await enviarAccion({ accion: "retrocederEgreso", id });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo retroceder: " + err.message); }
+}
+
+async function borrarEgresoUI(id){
+  const eg = egresos.find(x=>x.id===id);
+  if(!eg) return;
+  const ok = confirm(`¿Borrar la asignación de ${eg.cliente} (cupo ${eg.codigoCupo || "—"})?\n\nSi estaba vinculado a un cupo, vuelve a quedar pendiente.`);
+  if(!ok) return;
+  try{
+    await enviarAccion({ accion: "borrarEgreso", id });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo borrar: " + err.message); }
+}
+
+/* ---------- Modal asignar / crear / editar egreso ---------- */
+let editandoEgresoId = null;
+
+function limpiarFormEgreso(){
+  document.getElementById("eCodigoCupo").value = "";
+  document.getElementById("eCodigoCupo").disabled = false;
+  document.getElementById("egresoCupoResumen").style.display = "none";
+  document.getElementById("egresoCupoResumen").innerHTML = "";
+  document.getElementById("eCereal").value = "";
+  document.getElementById("eCereal").style.display = "";
+  document.getElementById("eOrigen").value = "Acopio";
+  document.getElementById("ePlanta").value = "Mónaco";
+  document.getElementById("eChofer").value = "";
+  document.getElementById("eDominio").value = "";
+  document.getElementById("eObs").value = "";
+}
+
+/* ---------- Nuevo cupo ---------- */
+let editandoCupoCodigo = null;
+
+function abrirNuevoCupo(){
+  editandoCupoCodigo = null;
+  document.getElementById("cupoModalTitulo").textContent = "Nuevo cupo";
+  document.getElementById("cupoModalHint").textContent = "El código de cupo lo escribís vos (suele venir del corredor o del sistema de la empresa) — acá no se inventa. Si tenés varios cupos con los mismos datos, pegalos todos juntos, uno por línea.";
+  document.getElementById("cuCodigosCupo").readOnly = false;
+  document.getElementById("cuCodigosCupo").value = "";
+  document.getElementById("cuFecha").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("cuCliente").value = "";
+  document.getElementById("cuCereal").value = "Trigo";
+  document.getElementById("cuCorredor").value = "";
+  document.getElementById("cuDestino").value = "";
+  document.getElementById("cuObs").value = "";
+  actualizarContadorCupos();
+  poblarFiltrosEgreso();
+  document.getElementById("cupoOverlay").classList.add("open");
+}
+
+function abrirEditarCupo(codigoCupo){
+  const cupo = cupos.find(c => c.codigoCupo === codigoCupo);
+  if(!cupo) return;
+
+  editandoCupoCodigo = codigoCupo;
+  document.getElementById("cupoModalTitulo").textContent = "Editar cupo · " + codigoCupo;
+  document.getElementById("cupoModalHint").textContent = "El código no se puede cambiar acá — si está mal, borrá este cupo y cargá uno nuevo con el código correcto.";
+  document.getElementById("cuCodigosCupo").readOnly = true;
+  document.getElementById("cuCodigosCupo").value = codigoCupo;
+  document.getElementById("cuCodigosContador").textContent = "";
+  document.getElementById("cupoBtnGuardar").textContent = "Guardar cambios";
+
+  // La fecha viene como dd/MM/yyyy desde la hoja; el input date necesita yyyy-MM-dd
+  const partes = (cupo.fecha || "").split("/");
+  document.getElementById("cuFecha").value = partes.length === 3 ? `${partes[2]}-${partes[1]}-${partes[0]}` : "";
+
+  document.getElementById("cuCliente").value = cupo.cliente || "";
+  document.getElementById("cuCereal").value = cupo.cereal || "Trigo";
+  document.getElementById("cuCorredor").value = cupo.corredor || "";
+  document.getElementById("cuDestino").value = cupo.destino || "";
+  document.getElementById("cuObs").value = cupo.observaciones || "";
+
+  poblarFiltrosEgreso();
+  document.getElementById("cupoOverlay").classList.add("open");
+}
+
+async function borrarCupoUI(codigoCupo){
+  const ok = confirm(`¿Borrar el cupo ${codigoCupo}?\n\nSolo se puede borrar si todavía no tiene un camión asignado.`);
+  if(!ok) return;
+  try{
+    await enviarAccion({ accion: "borrarCupo", codigoCupo });
+    await cargarDatos();
+  }catch(err){
+    alert("No se pudo borrar: " + err.message);
+  }
+}
+
+function actualizarContadorCupos(){
+  const codigos = document.getElementById("cuCodigosCupo").value
+    .split("\n").map(c => c.trim()).filter(Boolean);
+  const contador = document.getElementById("cuCodigosContador");
+  const boton = document.getElementById("cupoBtnGuardar");
+  if(codigos.length === 0){
+    contador.textContent = "";
+    boton.textContent = "Guardar cupo";
+  }else if(codigos.length === 1){
+    contador.textContent = "";
+    boton.textContent = "Guardar cupo";
+  }else{
+    contador.textContent = `(${codigos.length} cupos)`;
+    boton.textContent = `Guardar ${codigos.length} cupos`;
+  }
+}
+
+function closeNuevoCupo(){
+  document.getElementById("cupoOverlay").classList.remove("open");
+  document.getElementById("cuCodigosCupo").readOnly = false;
+  editandoCupoCodigo = null;
+}
+
+async function guardarNuevoCupo(){
+  const codigos = document.getElementById("cuCodigosCupo").value
+    .split("\n").map(c => c.trim()).filter(Boolean);
+  if(codigos.length === 0){ alert("Cargá al menos un código de cupo."); return; }
+
+  const boton = document.getElementById("cupoBtnGuardar");
+  const textoOriginal = boton.textContent;
+  boton.textContent = "Guardando…";
+  boton.disabled = true;
+
+  const datosBase = {
+    fecha: document.getElementById("cuFecha").value,
+    cliente: document.getElementById("cuCliente").value,
+    cereal: document.getElementById("cuCereal").value,
+    corredor: document.getElementById("cuCorredor").value,
+    destino: document.getElementById("cuDestino").value,
+    observaciones: document.getElementById("cuObs").value,
+  };
+
+  try{
+    if(editandoCupoCodigo){
+      await enviarAccion({ accion: "editarCupo", codigoCupo: editandoCupoCodigo, ...datosBase });
+    }else if(codigos.length === 1){
+      await enviarAccion({ accion: "crearCupo", codigoCupo: codigos[0], ...datosBase });
+    }else{
+      const resultado = await enviarAccion({ accion: "crearCuposMasivo", codigos, ...datosBase });
+      if(resultado.omitidos > 0){
+        alert(`Se crearon ${resultado.creados} cupos.\n${resultado.omitidos} ya existían y se omitieron:\n${resultado.codigosOmitidos.join(", ")}`);
+      }
+    }
+    closeNuevoCupo();
+    await cargarDatos();
+  }catch(err){
+    alert("No se pudo guardar el cupo: " + err.message);
+  }finally{
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+  }
+}
+
+function abrirNuevoEgresoManual(){
+  editandoEgresoId = null;
+  limpiarFormEgreso();
+  document.getElementById("egresoModalTitulo").textContent = "Nuevo egreso";
+  document.getElementById("egresoModalHint").textContent = "Si ya sabés a qué cupo va, elegilo. Si no, dejalo vacío — se asigna cuando el camión termine de cargar.";
+  document.getElementById("egresoBtnGuardar").textContent = "Guardar egreso";
+  poblarFiltrosEgreso();
+  document.getElementById("egresoOverlay").classList.add("open");
+}
+
+function abrirAsignarCamion(codigoCupo){
+  editandoEgresoId = null;
+  limpiarFormEgreso();
+  poblarFiltrosEgreso();
+
+  document.getElementById("egresoModalTitulo").textContent = "Asignar camión al cupo";
+  document.getElementById("egresoModalHint").textContent = "Elegí el cupo pendiente. Cliente, cereal, corredor y destino vienen de ahí — solo cargás los datos del camión.";
+  document.getElementById("egresoBtnGuardar").textContent = "Asignar camión";
+
+  document.getElementById("eCodigoCupo").value = codigoCupo;
+  onCupoEgresoChange();
+
+  document.getElementById("egresoOverlay").classList.add("open");
+}
+
+function onCupoEgresoChange(){
+  const codigo = document.getElementById("eCodigoCupo").value.trim();
+  const cupo = cupos.find(c => c.codigoCupo === codigo);
+  const resumen = document.getElementById("egresoCupoResumen");
+
+  if(!cupo){
+    resumen.style.display = "none";
+    resumen.innerHTML = "";
+    return;
+  }
+
+  resumen.style.display = "block";
+  resumen.innerHTML = `<strong>${cupo.cliente || "—"}</strong> · ${cupo.cereal || "—"} · Corredor: ${cupo.corredor || "—"} · Destino: ${cupo.destino || "—"}`;
+  if(cupo.cereal) document.getElementById("eCereal").value = cupo.cereal;
+}
+
+function editarEgresoUI(id){
+  const eg = egresos.find(x=>x.id===id);
+  if(!eg) return;
+
+  editandoEgresoId = id;
+
+  document.getElementById("egresoModalTitulo").textContent = "Editar egreso · " + id;
+  document.getElementById("egresoModalHint").textContent = "Corregí los datos del camión. El cupo y sus datos (cliente, cereal, corredor, destino) no se tocan acá.";
+  document.getElementById("egresoBtnGuardar").textContent = "Guardar cambios";
+
+  document.getElementById("eCodigoCupo").value = eg.codigoCupo || "";
+  document.getElementById("eCodigoCupo").disabled = true; // el vínculo con el cupo no se cambia al editar
+
+  const resumen = document.getElementById("egresoCupoResumen");
+  const eCerealSel = document.getElementById("eCereal");
+
+  if(eg.codigoCupo){
+    resumen.style.display = "block";
+    resumen.innerHTML = `<strong>${eg.cliente || "—"}</strong> · ${eg.cereal || "—"} · Corredor: ${eg.corredor || "—"} · Destino: ${eg.destino || "—"}`;
+    eCerealSel.style.display = "none"; // ya viene fijado por el cupo
+  }else{
+    resumen.style.display = "none";
+    eCerealSel.style.display = "";
+    eCerealSel.value = eg.cereal || "";
+  }
+
+  document.getElementById("eOrigen").value = eg.origen || "Acopio";
+  document.getElementById("ePlanta").value = eg.planta || "Mónaco";
+  document.getElementById("eChofer").value = eg.chofer === "—" ? "" : eg.chofer;
+  document.getElementById("eDominio").value = eg.dominio === "—" ? "" : eg.dominio;
+  document.getElementById("eObs").value = eg.obs || "";
+
+  document.getElementById("egresoOverlay").classList.add("open");
+}
+
+function closeEgresoModal(){
+  document.getElementById("egresoOverlay").classList.remove("open");
+  editandoEgresoId = null;
+}
+
+function onChoferChangeEgreso(){
+  const nombre = document.getElementById("eChofer").value.trim();
+  const t = TRANSPORTES.find(x=>x.chofer.toLowerCase()===nombre.toLowerCase());
+  if(t) document.getElementById("eDominio").value = `${t.dominioChasis} / ${t.dominioAcoplado}`;
+}
+
+async function guardarEgresoModal(){
+  const codigoCupo = document.getElementById("eCodigoCupo").value.trim();
+  if(codigoCupo && !editandoEgresoId && !cupos.some(c => c.codigoCupo === codigoCupo)){
+    alert("Ese código de cupo no existe en la hoja Cupos. Revisá que esté bien escrito, o dejalo vacío para asignarlo después.");
+    return;
+  }
+
+  const boton = document.getElementById("egresoBtnGuardar");
+  const textoOriginal = boton.textContent;
+  boton.textContent = "Guardando…";
+  boton.disabled = true;
+
+  const datos = {
+    codigoCupo,
+    cereal: document.getElementById("eCereal").value,
+    origen: document.getElementById("eOrigen").value,
+    planta: document.getElementById("ePlanta").value,
+    chofer: document.getElementById("eChofer").value,
+    dominio: document.getElementById("eDominio").value,
+    observaciones: document.getElementById("eObs").value,
+  };
+
+  try{
+    if(editandoEgresoId){
+      await enviarAccion({ accion: "editarEgreso", id: editandoEgresoId, ...datos });
+    }else{
+      await enviarAccion({ accion: "crearEgreso", ...datos });
+    }
+    closeEgresoModal();
+    await cargarDatos();
+  }catch(err){
+    alert("No se pudo guardar: " + err.message);
+  }finally{
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+  }
+}
+
+/* ---------- Impresión de pendientes ---------- */
+function imprimirPendientes(){
+  const etiquetas = { hoy: "de hoy", semana: "de esta semana", todos: "— todos" };
+  const fecha = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
+  document.getElementById("tituloImpresion").textContent =
+    `Cupos pendientes para cargar ${etiquetas[rangoPendientes] || ""} — ${fecha}`;
+  window.print();
+}
+
+init();
+
+// Registro del service worker — necesario para que el navegador
+// habilite "Instalar app". No hace nada si se abre como archivo local.
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

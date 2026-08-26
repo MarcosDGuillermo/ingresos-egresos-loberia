@@ -1039,8 +1039,8 @@
 <!-- ---------- Modal nuevo transporte ---------- -->
 <div class="modal-overlay" id="transporteOverlay">
   <div class="modal">
-    <h2>Nuevo transporte</h2>
-    <div class="hint">Cargá los datos completos. Al guardar, queda disponible para elegir en cualquier ingreso.</div>
+    <h2 id="transporteModalTitulo">Nuevo transporte</h2>
+    <div class="hint" id="transporteModalHint">Cargá los datos completos. Al guardar, queda disponible para elegir en cualquier ingreso.</div>
     <div class="form-grid">
       <div>
         <label for="tNombreChofer">Nombre del chofer</label>
@@ -1248,16 +1248,19 @@
 <div class="modal-overlay" id="buscarTransporteOverlay">
   <div class="modal">
     <h2>Buscar transporte</h2>
-    <div class="hint">Elegí un chofer para ver y compartir sus datos, sin necesidad de tener un ingreso o egreso cargado.</div>
+    <div class="hint">Elegí un chofer para ver, compartir o editar sus datos — o cargá uno nuevo si todavía no existe.</div>
     <div class="form-grid">
       <div class="full">
         <label for="btChofer">Chofer</label>
         <input type="text" id="btChofer" list="choferListDL" placeholder="Escribí o elegí un chofer" autocomplete="off" oninput="onBuscarTransporteChange()">
       </div>
       <div class="full" id="btPreview" style="display:none; background:var(--panel-2); border-radius:8px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:12.5px; white-space:pre-wrap; color:var(--ink);"></div>
+      <div class="full" id="btSinResultado" style="display:none; font-size:12.5px; color:var(--ink-soft);">No encontré ese chofer en Transportes todavía.</div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeBuscarTransporte()">Cerrar</button>
+      <button class="btn-ghost" id="btNuevoBtn" onclick="abrirTransporteDesdeBusqueda('nuevo')">＋ Agregar nuevo</button>
+      <button class="btn-ghost" id="btEditarBtn" onclick="abrirTransporteDesdeBusqueda('editar')" style="display:none;">✏️ Editar</button>
       <button class="btn-primary" id="btCompartirBtn" onclick="compartirDesdeBusqueda()" style="display:none;">📤 Compartir</button>
     </div>
   </div>
@@ -1723,15 +1726,21 @@ function onBuscarTransporteChange(){
   const nombre = document.getElementById("btChofer").value.trim();
   const texto = textoTransporte(nombre);
   const preview = document.getElementById("btPreview");
-  const boton = document.getElementById("btCompartirBtn");
+  const sinResultado = document.getElementById("btSinResultado");
+  const btnCompartir = document.getElementById("btCompartirBtn");
+  const btnEditar = document.getElementById("btEditarBtn");
 
   if(texto){
     preview.textContent = texto;
     preview.style.display = "block";
-    boton.style.display = "";
+    sinResultado.style.display = "none";
+    btnCompartir.style.display = "";
+    btnEditar.style.display = "";
   }else{
     preview.style.display = "none";
-    boton.style.display = "none";
+    btnCompartir.style.display = "none";
+    btnEditar.style.display = "none";
+    sinResultado.style.display = nombre.length > 1 ? "block" : "none";
   }
 }
 
@@ -2118,7 +2127,14 @@ async function guardarNuevoCliente(){
 }
 
 /* ---------- Nuevo transporte ---------- */
+let editandoTransporteChofer = null;
+
 function abrirNuevoTransporte(){
+  editandoTransporteChofer = null;
+  document.getElementById("transporteModalTitulo").textContent = "Nuevo transporte";
+  document.getElementById("transporteModalHint").textContent = "Cargá los datos completos. Al guardar, queda disponible para elegir en cualquier ingreso.";
+  document.getElementById("transporteBtnGuardar").textContent = "Guardar transporte";
+
   const nombreTipeado = document.getElementById("fChofer").value.trim();
   document.getElementById("tNombreChofer").value = nombreTipeado;
   document.getElementById("tCuitChofer").value = "";
@@ -2131,8 +2147,58 @@ function abrirNuevoTransporte(){
   document.getElementById("transporteOverlay").classList.add("open");
 }
 
+let vineDeBuscarTransporte = false;
+
+/* Abre el modal de transporte desde el buscador general (header),
+   ya sea para cargar uno nuevo o editar el que está en pantalla. */
+function abrirTransporteDesdeBusqueda(modo){
+  const nombre = document.getElementById("btChofer").value.trim();
+  vineDeBuscarTransporte = true;
+  document.getElementById("buscarTransporteOverlay").classList.remove("open"); // se tapaban entre sí
+
+  if(modo === "editar"){
+    const t = TRANSPORTES.find(x => x.chofer.toLowerCase() === nombre.toLowerCase());
+    if(!t){ alert("No encontré ese chofer para editar."); return; }
+
+    editandoTransporteChofer = t.chofer;
+    document.getElementById("transporteModalTitulo").textContent = "Editar transporte";
+    document.getElementById("transporteModalHint").textContent = "Corregí lo que haga falta, incluso el nombre del chofer si estaba mal escrito.";
+    document.getElementById("transporteBtnGuardar").textContent = "Guardar cambios";
+
+    document.getElementById("tNombreChofer").value = t.chofer || "";
+    document.getElementById("tCuitChofer").value = t.cuitChofer || "";
+    document.getElementById("tNombreTransporte").value = t.nombreTransporte || "";
+    document.getElementById("tCuitTransporte").value = t.cuitTransporte || "";
+    document.getElementById("tDominioChasis").value = t.dominioChasis || "";
+    document.getElementById("tDominioAcoplado").value = t.dominioAcoplado || "";
+    document.getElementById("tEscalable").value = t.escalable || "NO";
+    document.getElementById("tPesoBruto").value = t.pesoBrutoMaximo || "";
+  }else{
+    editandoTransporteChofer = null;
+    document.getElementById("transporteModalTitulo").textContent = "Nuevo transporte";
+    document.getElementById("transporteModalHint").textContent = "Cargá los datos completos. Al guardar, queda disponible para elegir en cualquier ingreso o egreso.";
+    document.getElementById("transporteBtnGuardar").textContent = "Guardar transporte";
+
+    document.getElementById("tNombreChofer").value = nombre;
+    document.getElementById("tCuitChofer").value = "";
+    document.getElementById("tNombreTransporte").value = "";
+    document.getElementById("tCuitTransporte").value = "";
+    document.getElementById("tDominioChasis").value = "";
+    document.getElementById("tDominioAcoplado").value = "";
+    document.getElementById("tEscalable").value = "NO";
+    document.getElementById("tPesoBruto").value = "";
+  }
+
+  document.getElementById("transporteOverlay").classList.add("open");
+}
+
 function closeNuevoTransporte(){
   document.getElementById("transporteOverlay").classList.remove("open");
+  editandoTransporteChofer = null;
+  if(vineDeBuscarTransporte){
+    document.getElementById("buscarTransporteOverlay").classList.add("open");
+    vineDeBuscarTransporte = false;
+  }
 }
 
 async function guardarNuevoTransporte(){
@@ -2145,8 +2211,7 @@ async function guardarNuevoTransporte(){
   boton.disabled = true;
 
   try{
-    const resultado = await enviarAccion({
-      accion: "crearTransporte",
+    const datos = {
       nombreChofer,
       cuitChofer: document.getElementById("tCuitChofer").value,
       nombreTransporte: document.getElementById("tNombreTransporte").value,
@@ -2155,15 +2220,30 @@ async function guardarNuevoTransporte(){
       dominioAcoplado: document.getElementById("tDominioAcoplado").value,
       escalable: document.getElementById("tEscalable").value,
       pesoBrutoMaximo: document.getElementById("tPesoBruto").value,
-    });
+    };
+
+    let resultado;
+    if(editandoTransporteChofer){
+      resultado = await enviarAccion({ accion: "editarTransporte", choferOriginal: editandoTransporteChofer, ...datos });
+    }else{
+      resultado = await enviarAccion({ accion: "crearTransporte", ...datos });
+    }
 
     closeNuevoTransporte();
     await cargarDatos(); // refresca TRANSPORTES y el datalist
 
-    // Vuelve a completar el chofer/dominio en el modal de ingreso con lo recién creado
+    // Si el modal de ingreso está esperando un chofer nuevo, lo completa
     document.getElementById("fChofer").value = resultado.chofer;
     document.getElementById("fDominio").value = resultado.dominio;
     document.getElementById("choferNuevoAviso").style.display = "none";
+
+    // Si venimos del buscador de transporte, actualiza la vista previa con lo nuevo
+    if(vineDeBuscarTransporte){
+      document.getElementById("btChofer").value = resultado.chofer;
+      onBuscarTransporteChange();
+      document.getElementById("buscarTransporteOverlay").classList.add("open");
+      vineDeBuscarTransporte = false;
+    }
   }catch(err){
     alert("No se pudo guardar el transporte: " + err.message);
   }finally{

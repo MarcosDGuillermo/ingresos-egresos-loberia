@@ -1360,6 +1360,7 @@ async function cargarDatos(mostrarError = true){
     ingresos = (data.ingresos || []).map(i => ({
       id: campo(i, "ID"),
       fecha: campo(i, "Fecha"),
+      fechaFin: campo(i, "FechaFin"),
       cliente: campo(i, "Cliente"),
       campo: campo(i, "Campo"),
       cereal: campo(i, "Cereal"),
@@ -1392,6 +1393,7 @@ async function cargarDatos(mostrarError = true){
     egresos = (data.egresos || []).map(eg => ({
       id: campo(eg, "ID"),
       fecha: campo(eg, "Fecha"),
+      fechaFin: campo(eg, "FechaFin"),
       codigoCupo: campo(eg, "CodigoCupo", "Código Cupo"),
       cliente: campo(eg, "Cliente"),
       cereal: campo(eg, "Cereal"),
@@ -1629,7 +1631,7 @@ function render(){
   document.getElementById("counts").innerHTML = `
     <span class="count-pill">En proceso: ${ingresos.filter(i=>i.estado<4).length}</span>
     <span class="count-pill">En calado: ${ingresos.filter(i=>i.estado===2).length}</span>
-    <span class="count-pill">Finalizados hoy: ${ingresos.filter(i=>i.estado===4 && esHoy(i.fecha)).length}</span>
+    <span class="count-pill">Finalizados hoy: ${ingresos.filter(i=>i.estado===4 && esHoy(i.fechaFin || i.fecha)).length}</span>
   `;
 
   const purgadosEnProceso = ingresos.filter(i => i.parcial && i.estado < 4).length;
@@ -2475,7 +2477,7 @@ function renderEgresos(){
   document.getElementById("countsEgreso").innerHTML = `
     <span class="count-pill">Pendientes: ${pendientes.length}</span>
     <span class="count-pill">Cargando: ${enProceso.length}</span>
-    <span class="count-pill">Finalizados hoy: ${egresos.filter(eg=>eg.estado===3 && esHoy(eg.fecha)).length}</span>
+    <span class="count-pill">Finalizados hoy: ${egresos.filter(eg=>eg.estado===3 && esHoy(eg.fechaFin || eg.fecha)).length}</span>
   `;
 
   // ---- Camiones cargados (Finalizados) ----

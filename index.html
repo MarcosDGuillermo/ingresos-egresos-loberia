@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ingresos · Cereales Lobería</title>
+<title>Logística · Cereales Lobería</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#201D18">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -803,7 +803,7 @@
 <header class="topbar">
   <div class="brand">
     <img src="icons/icon-192.png" alt="Cereales Lobería" class="brand-logo" onerror="this.style.display='none'">
-    <span class="mark" id="modoTitulo">Ingresos</span>
+    <span class="mark" id="modoTitulo">Logística</span>
     <span class="sub">Cereales Lobería · Planta</span>
     <div class="modo-toggle" id="modoAppTabs">
       <button class="modo-btn active" data-modo="ingresos">📥 Ingresos</button>
@@ -1467,7 +1467,6 @@ function init(){
       document.getElementById("seccionEgresos").style.display = modoApp === "egresos" ? "" : "none";
       document.getElementById("accionesIngresos").style.display = modoApp === "ingresos" ? "flex" : "none";
       document.getElementById("accionesEgresos").style.display = modoApp === "egresos" ? "flex" : "none";
-      document.getElementById("modoTitulo").textContent = modoApp === "ingresos" ? "Ingresos" : "Egresos";
       if(modoApp === "egresos") renderEgresos();
     });
   });

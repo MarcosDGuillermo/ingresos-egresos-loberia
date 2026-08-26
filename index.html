@@ -64,6 +64,7 @@
   .brand{
     display:flex;
     align-items:center;
+    flex-wrap:wrap;
     gap:10px;
   }
   .brand-logo{
@@ -87,7 +88,8 @@
   .topbar-right{
     display:flex;
     align-items:center;
-    gap:14px;
+    flex-wrap:wrap;
+    gap:10px;
   }
   .date-chip{
     font-family:'JetBrains Mono', monospace;
@@ -186,7 +188,8 @@
   .cupo-row{
     display:flex;
     align-items:center;
-    gap:14px;
+    flex-wrap:wrap;
+    gap:8px 14px;
     background: var(--panel);
     border:1px solid var(--line);
     border-radius:8px;
@@ -194,11 +197,18 @@
     margin-bottom:6px;
   }
   .cupo-row-main{
-    flex:1;
+    flex:1 1 auto;
+    min-width:180px;
     display:flex;
-    align-items:baseline;
+    flex-direction:column;
+    gap:2px;
+  }
+  .cupo-row-acciones{
+    display:flex;
+    align-items:center;
     gap:10px;
-    min-width:0;
+    flex-wrap:wrap;
+    margin-left:auto;
   }
   .cupo-cliente{
     font-family:'Space Grotesk', sans-serif;
@@ -208,9 +218,6 @@
   .cupo-detalle{
     font-size:12px;
     color: var(--ink-soft);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
   }
   .cupo-codigo{
     font-family:'JetBrains Mono', monospace;
@@ -752,7 +759,17 @@
   @media (max-width: 640px){
     .form-grid{ grid-template-columns: 1fr; }
     .pipeline{ overflow-x:auto; }
-    header.topbar{ padding: 16px; }
+    header.topbar{ padding: 14px; gap:10px; }
+    .brand .sub{ display:none; } /* en mobile alcanza con el logo + Ingresos/Egresos */
+    .modo-toggle{ order:3; width:100%; justify-content:center; }
+    .topbar-right{ width:100%; }
+    .topbar-right button{ font-size:12px; padding:8px 10px; flex:1 1 auto; }
+    .date-chip{ order:-1; }
+    .toolbar{ gap:8px; padding:0 16px; }
+    main{ padding:0 16px; }
+    .toolbar .tabs .tab{ font-size:12px; padding:8px 10px; }
+    .toolbar .counts{ font-size:11px; }
+    .count-pill{ padding:4px 8px; }
   }
 
   @media print{
@@ -779,11 +796,11 @@
   <div class="topbar-right">
     <span class="date-chip" id="todayChip"></span>
     <button class="btn-ghost-dark" onclick="abrirBuscarTransporte()" title="Buscar y compartir datos de un transporte">🔍 Buscar transporte</button>
-    <span id="accionesIngresos">
+    <span id="accionesIngresos" style="display:flex; flex-wrap:wrap; gap:10px;">
       <button class="btn-ghost-dark" onclick="openMantenimiento('ingresos')" title="Borrar ingresos finalizados viejos">🧹 Mantenimiento</button>
       <button class="btn-primary" onclick="openModal()">＋ Nuevo ingreso</button>
     </span>
-    <span id="accionesEgresos" style="display:none;">
+    <span id="accionesEgresos" style="display:none; flex-wrap:wrap; gap:10px;">
       <button class="btn-ghost-dark" onclick="openMantenimiento('egresos')" title="Borrar egresos finalizados viejos">🧹 Mantenimiento</button>
       <button class="btn-ghost-dark" onclick="abrirNuevoCupo()">＋ Nuevo cupo</button>
       <button class="btn-primary" onclick="abrirNuevoEgresoManual()">＋ Nuevo egreso</button>
@@ -1431,8 +1448,8 @@ function init(){
       modoApp = btn.dataset.modo;
       document.getElementById("seccionIngresos").style.display = modoApp === "ingresos" ? "" : "none";
       document.getElementById("seccionEgresos").style.display = modoApp === "egresos" ? "" : "none";
-      document.getElementById("accionesIngresos").style.display = modoApp === "ingresos" ? "" : "none";
-      document.getElementById("accionesEgresos").style.display = modoApp === "egresos" ? "" : "none";
+      document.getElementById("accionesIngresos").style.display = modoApp === "ingresos" ? "flex" : "none";
+      document.getElementById("accionesEgresos").style.display = modoApp === "egresos" ? "flex" : "none";
       document.getElementById("modoTitulo").textContent = modoApp === "ingresos" ? "Ingresos" : "Egresos";
       if(modoApp === "egresos") renderEgresos();
     });
@@ -2423,10 +2440,12 @@ function renderCuposPendientes(pendientes){
               <span class="cupo-cliente">${c.cliente || "—"}</span>
               <span class="cupo-detalle"><strong>Corredor:</strong> ${c.corredor || "—"} &nbsp;·&nbsp; <strong>Destino:</strong> ${c.destino || "—"}</span>
             </div>
-            <span class="cupo-codigo">${c.codigoCupo}</span>
-            <button class="btn-ghost advance" onclick="abrirAsignarCamion('${c.codigoCupo}')">Asignar camión</button>
-            <button class="btn-ghost link" onclick="abrirEditarCupo('${c.codigoCupo}')">Editar</button>
-            <button class="btn-ghost link" style="color:var(--rust);" onclick="borrarCupoUI('${c.codigoCupo}')">Borrar</button>
+            <div class="cupo-row-acciones">
+              <span class="cupo-codigo">${c.codigoCupo}</span>
+              <button class="btn-ghost advance" onclick="abrirAsignarCamion('${c.codigoCupo}')">Asignar camión</button>
+              <button class="btn-ghost link" onclick="abrirEditarCupo('${c.codigoCupo}')">Editar</button>
+              <button class="btn-ghost link" style="color:var(--rust);" onclick="borrarCupoUI('${c.codigoCupo}')">Borrar</button>
+            </div>
           </div>
         `;
       });

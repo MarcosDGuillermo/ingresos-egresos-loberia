@@ -770,6 +770,23 @@
     .toolbar .tabs .tab{ font-size:12px; padding:8px 10px; }
     .toolbar .counts{ font-size:11px; }
     .count-pill{ padding:4px 8px; }
+
+    /* Vista compacta: cliente/campo/chofer siempre en su propia línea completa,
+       para que nunca queden aplastados por las etiquetas de cereal/etapa/planta */
+    .compact-summary{ flex-wrap:wrap; gap:8px 10px; }
+    .compact-main{
+      flex:1 1 100%;
+      order:1;
+      flex-wrap:wrap;
+      white-space:normal;
+    }
+    .compact-cliente, .compact-campo, .compact-chofer{
+      white-space:normal;
+      overflow:visible;
+      text-overflow:clip;
+    }
+    .compact-etapa, .compact-humedad, .plant-tag, .cereal-badge{ order:2; }
+    .compact-caret{ order:3; margin-left:auto; }
   }
 
   @media print{

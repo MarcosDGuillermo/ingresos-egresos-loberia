@@ -1606,18 +1606,21 @@ function render(){
       // Finalizados siempre al fondo
       if(a.estado===4 && b.estado!==4) return 1;
       if(b.estado===4 && a.estado!==4) return -1;
-      // Los que todavía no arribaron (sin hora) quedan al final del grupo.
+
+      // Entre los que siguen en proceso: agrupa por etapa,
+      // Descargando (3) > Calado (2) > Arribo (1) > Anunciado (0)
+      if(a.estado !== b.estado) return b.estado - a.estado;
+
+      // Dentro de la misma etapa: respeta el orden manual (drag&drop) si existe.
+      const ao = (a.orden !== undefined && a.orden !== "" && a.orden !== null) ? Number(a.orden) : null;
+      const bo = (b.orden !== undefined && b.orden !== "" && b.orden !== null) ? Number(b.orden) : null;
+      if(ao !== null && bo !== null) return ao - bo;
+      if(ao !== null) return -1;
+      if(bo !== null) return 1;
+      // sin orden manual: por hora real de llegada (si la tienen)
+      if(a.horaArribo && b.horaArribo) return a.horaArribo.localeCompare(b.horaArribo);
+      if(a.horaArribo && !b.horaArribo) return -1;
       if(!a.horaArribo && b.horaArribo) return 1;
-      if(!b.horaArribo && a.horaArribo) return -1;
-      if(a.horaArribo && b.horaArribo){
-        // Entre los que ya arribaron: respeta el orden manual (drag&drop) si existe.
-        const ao = (a.orden !== undefined && a.orden !== "" && a.orden !== null) ? Number(a.orden) : null;
-        const bo = (b.orden !== undefined && b.orden !== "" && b.orden !== null) ? Number(b.orden) : null;
-        if(ao !== null && bo !== null) return ao - bo;
-        if(ao !== null) return -1;
-        if(bo !== null) return 1;
-        return a.horaArribo.localeCompare(b.horaArribo); // sin orden manual: por hora real de llegada
-      }
       return 0;
     });
 
@@ -2527,8 +2530,19 @@ function renderCuposPendientes(pendientes){
     (porDia[dia] = porDia[dia] || []).push(c);
   });
 
+  // Ordena los grupos de día cronológicamente (de más próximo a más lejano).
+  // Los grupos sin fecha parseable quedan al final.
+  const diasOrdenados = Object.keys(porDia).sort((diaA, diaB) => {
+    const fechaA = parseFechaDDMMYYYY(porDia[diaA][0].fecha);
+    const fechaB = parseFechaDDMMYYYY(porDia[diaB][0].fecha);
+    if(!fechaA && !fechaB) return 0;
+    if(!fechaA) return 1;
+    if(!fechaB) return -1;
+    return fechaA - fechaB;
+  });
+
   let html = "";
-  Object.keys(porDia).forEach(dia => {
+  diasOrdenados.forEach(dia => {
     html += `<div class="cupo-dia-header">${dia} <span style="color:var(--gold);">(${porDia[dia].length})</span></div>`;
 
     const porCereal = {};

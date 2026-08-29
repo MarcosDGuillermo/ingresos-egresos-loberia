@@ -1617,10 +1617,14 @@ function render(){
       if(ao !== null && bo !== null) return ao - bo;
       if(ao !== null) return -1;
       if(bo !== null) return 1;
-      // sin orden manual: por hora real de llegada (si la tienen)
-      if(a.horaArribo && b.horaArribo) return a.horaArribo.localeCompare(b.horaArribo);
-      if(a.horaArribo && !b.horaArribo) return -1;
-      if(!a.horaArribo && b.horaArribo) return 1;
+      // sin orden manual: por la hora del evento que corresponde a la etapa actual
+      // (en Descargando ya pasaron el Calado, así que el orden real de la cola
+      // lo marca cuándo salieron de Calado, no cuándo habían arribado)
+      const ah = (a.estado >= 3 ? a.horaCalado : null) || a.horaArribo;
+      const bh = (b.estado >= 3 ? b.horaCalado : null) || b.horaArribo;
+      if(ah && bh) return ah.localeCompare(bh);
+      if(ah && !bh) return -1;
+      if(!ah && bh) return 1;
       return 0;
     });
 

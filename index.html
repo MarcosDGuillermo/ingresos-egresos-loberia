@@ -1662,11 +1662,19 @@ function render(){
     i.queueNum = (i.estado < 4 && i.horaArribo) ? ++contadorCola : null;
   });
 
-  document.getElementById("counts").innerHTML = `
+  let countsHtml = `
     <span class="count-pill">En proceso: ${ingresos.filter(i=>i.estado<4).length}</span>
     <span class="count-pill">En calado: ${ingresos.filter(i=>i.estado===2).length}</span>
     <span class="count-pill">Finalizados hoy: ${ingresos.filter(i=>i.estado===4 && esHoy(i.fechaFin || i.fecha)).length}</span>
   `;
+  if(plantaFiltro !== "Todas"){
+    const enPlanta = ingresos.filter(i => i.planta === plantaFiltro);
+    countsHtml += `
+      <span class="count-pill" style="background:var(--gold-soft); color:var(--gold);">${plantaFiltro} · en proceso: ${enPlanta.filter(i=>i.estado<4).length}</span>
+      <span class="count-pill" style="background:var(--gold-soft); color:var(--gold);">${plantaFiltro} · finalizados hoy: ${enPlanta.filter(i=>i.estado===4 && esHoy(i.fechaFin || i.fecha)).length}</span>
+    `;
+  }
+  document.getElementById("counts").innerHTML = countsHtml;
 
   const purgadosEnProceso = ingresos.filter(i => i.parcial && i.estado < 4).length;
   const btnPurgados = document.getElementById("btnSoloPurgados");
@@ -2584,11 +2592,19 @@ function renderEgresos(){
   enProceso = enProceso.filter(eg => origenFiltroEgreso === "Todos" || eg.origen === origenFiltroEgreso);
   enProceso = enProceso.filter(pasaFiltrosComunes);
 
-  document.getElementById("countsEgreso").innerHTML = `
+  let countsEgresoHtml = `
     <span class="count-pill">Pendientes: ${pendientes.length}</span>
     <span class="count-pill">Cargando: ${enProceso.length}</span>
     <span class="count-pill">Finalizados hoy: ${egresos.filter(eg=>eg.estado===3 && esHoy(eg.fechaFin || eg.fecha)).length}</span>
   `;
+  if(plantaFiltroEgreso !== "Todas"){
+    const enPlantaEgreso = egresos.filter(eg => eg.planta === plantaFiltroEgreso);
+    countsEgresoHtml += `
+      <span class="count-pill" style="background:var(--gold-soft); color:var(--gold);">${plantaFiltroEgreso} · cargando: ${enPlantaEgreso.filter(eg=>eg.estado<3).length}</span>
+      <span class="count-pill" style="background:var(--gold-soft); color:var(--gold);">${plantaFiltroEgreso} · finalizados hoy: ${enPlantaEgreso.filter(eg=>eg.estado===3 && esHoy(eg.fechaFin || eg.fecha)).length}</span>
+    `;
+  }
+  document.getElementById("countsEgreso").innerHTML = countsEgresoHtml;
 
   // ---- Camiones cargados (Finalizados) ----
   let finalizados = egresos.filter(eg => eg.estado === 3);

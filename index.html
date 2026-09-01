@@ -812,6 +812,7 @@
   </div>
   <div class="topbar-right">
     <span class="date-chip" id="todayChip"></span>
+    <button class="btn-ghost-dark" onclick="abrirListaClientes()" title="Ver clientes con su campo y km cargados">📋 Clientes</button>
     <button class="btn-ghost-dark" onclick="abrirBuscarTransporte()" title="Buscar y compartir datos de un transporte">🔍 Buscar transporte</button>
     <span id="accionesIngresos" style="display:flex; flex-wrap:wrap; gap:10px;">
       <button class="btn-ghost-dark" onclick="openMantenimiento('ingresos')" title="Borrar ingresos finalizados viejos">🧹 Mantenimiento</button>
@@ -980,10 +981,8 @@
       </div>
       <div>
         <label for="fPlanta">Planta</label>
-        <select id="fPlanta">
-          <option>Mónaco</option>
-          <option>La Virgen</option>
-        </select>
+        <input type="text" id="fPlanta" list="plantaListDL" placeholder="Escribí o elegí una planta" autocomplete="off">
+        <datalist id="plantaListDL"></datalist>
       </div>
       <div>
         <label for="fChofer">Chofer / Transporte</label>
@@ -1266,6 +1265,25 @@
   </div>
 </div>
 
+<!-- ---------- Modal lista de clientes (Cliente / Campo / Km) ---------- -->
+<div class="modal-overlay" id="clientesListaOverlay">
+  <div class="modal">
+    <h2>Clientes</h2>
+    <div class="hint">Cliente, campo y km cargados hasta ahora. Se va completando de a poco con el uso — si falta un campo o el km, agregalo desde "Nuevo cliente".</div>
+    <div class="form-grid">
+      <div class="full">
+        <input type="text" id="clientesListaBuscador" class="search-input" placeholder="Buscar por cliente o campo…" oninput="renderListaClientes()" style="width:100%;">
+      </div>
+      <div class="full" id="clientesListaTabla" style="max-height:50vh; overflow-y:auto;"></div>
+      <div class="full" id="clientesListaVacio" style="display:none; font-size:12.5px; color:var(--ink-soft);">No hay clientes cargados todavía.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeListaClientes()">Cerrar</button>
+      <button class="btn-primary" onclick="closeListaClientes(); abrirNuevoCliente();">＋ Nuevo cliente</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ============================================================
    API — conectado al Apps Script real (Web App)
@@ -1302,6 +1320,7 @@ let egresos = [];
 let cupos = [];
 let CORREDORES = [];
 let DESTINOS = [];
+let PLANTAS = [];
 let plantaFiltro = "Todas";
 let vistaModo = "tarjetas";
 let cerealFiltro = "Todos";
@@ -1412,6 +1431,7 @@ async function cargarDatos(mostrarError = true){
 
     CORREDORES = data.corredores || [];
     DESTINOS = data.destinos || [];
+    PLANTAS = data.plantas && data.plantas.length ? data.plantas : ["Mónaco", "La Virgen"];
 
     poblarListas();
     poblarCerealTabs();
@@ -1558,6 +1578,10 @@ function poblarListas(){
   const clientesUnicos = [...new Set(CLIENTES.map(c => c.cliente))].sort();
   document.getElementById("clienteListDL").innerHTML =
     clientesUnicos.map(c => `<option value="${c}"></option>`).join("");
+
+  const plantasUnicas = [...new Set(PLANTAS)].sort();
+  document.getElementById("plantaListDL").innerHTML =
+    plantasUnicas.map(p => `<option value="${p}"></option>`).join("");
 
   const choferesUnicos = [...new Set(TRANSPORTES.map(t => t.chofer))].sort();
   document.getElementById("choferListDL").innerHTML =
@@ -1718,6 +1742,56 @@ async function compartirTransporte(nombreChofer){
   }catch(err){
     prompt("Copiá estos datos:", texto);
   }
+}
+
+/* ---------- Lista de clientes (Cliente / Campo / Km) ---------- */
+function abrirListaClientes(){
+  document.getElementById("clientesListaBuscador").value = "";
+  renderListaClientes();
+  document.getElementById("clientesListaOverlay").classList.add("open");
+}
+
+function closeListaClientes(){
+  document.getElementById("clientesListaOverlay").classList.remove("open");
+}
+
+function renderListaClientes(){
+  const busqueda = (document.getElementById("clientesListaBuscador").value || "").trim().toLowerCase();
+  const tabla = document.getElementById("clientesListaTabla");
+  const vacio = document.getElementById("clientesListaVacio");
+
+  const filas = CLIENTES
+    .filter(c => !busqueda ||
+      c.cliente.toLowerCase().includes(busqueda) ||
+      (c.campo || "").toLowerCase().includes(busqueda))
+    .sort((a,b) => a.cliente.localeCompare(b.cliente) || (a.campo||"").localeCompare(b.campo||""));
+
+  if(filas.length === 0){
+    tabla.innerHTML = "";
+    vacio.style.display = "block";
+    return;
+  }
+  vacio.style.display = "none";
+
+  tabla.innerHTML = `
+    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+      <thead>
+        <tr style="text-align:left; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;">
+          <th style="padding:6px 8px; border-bottom:1px solid var(--line);">Cliente</th>
+          <th style="padding:6px 8px; border-bottom:1px solid var(--line);">Campo</th>
+          <th style="padding:6px 8px; border-bottom:1px solid var(--line);">Km</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filas.map(c => `
+          <tr>
+            <td style="padding:7px 8px; border-bottom:1px solid var(--line); font-weight:600;">${c.cliente}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid var(--line); color:var(--ink-soft);">${c.campo || "—"}</td>
+            <td style="padding:7px 8px; border-bottom:1px solid var(--line); color:var(--ink-soft);">${c.km || "—"}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>`;
 }
 
 function abrirBuscarTransporte(){
@@ -2023,6 +2097,8 @@ function onChoferChange(){
 async function guardarModal(){
   const cliente = document.getElementById("fCliente").value;
   if(!cliente){ alert("Elegí un cliente antes de guardar."); return; }
+  const planta = document.getElementById("fPlanta").value.trim();
+  if(!planta){ alert("Escribí o elegí una planta antes de guardar."); return; }
 
   const boton = document.getElementById("modalBtnGuardar");
   const textoOriginal = boton.textContent;
@@ -2035,7 +2111,7 @@ async function guardarModal(){
     cereal: document.getElementById("fCereal").value,
     chofer: document.getElementById("fChofer").value,
     dominio: document.getElementById("fDominio").value,
-    planta: document.getElementById("fPlanta").value,
+    planta,
     observaciones: document.getElementById("fObs").value,
   };
 

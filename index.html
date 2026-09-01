@@ -830,8 +830,6 @@
 <div class="toolbar">
   <div class="tabs" id="plantTabs">
     <button class="tab active" data-plant="Todas">Todas</button>
-    <button class="tab" data-plant="Mónaco">Planta Mónaco</button>
-    <button class="tab" data-plant="La Virgen">Planta La Virgen</button>
   </div>
   <div style="display:flex; align-items:center; gap:12px;">
     <div class="tabs" id="vistaTabs">
@@ -869,8 +867,6 @@
   <div class="toolbar">
     <div class="tabs" id="plantTabsEgreso">
       <button class="tab active" data-plant="Todas">Todas</button>
-      <button class="tab" data-plant="Mónaco">Planta Mónaco</button>
-      <button class="tab" data-plant="La Virgen">Planta La Virgen</button>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
       <div class="tabs" id="vistaTabsEgreso">
@@ -1434,6 +1430,7 @@ async function cargarDatos(mostrarError = true){
     PLANTAS = data.plantas && data.plantas.length ? data.plantas : ["Mónaco", "La Virgen"];
 
     poblarListas();
+    poblarPlantaTabs();
     poblarCerealTabs();
     render();
     renderEgresos();
@@ -1465,15 +1462,6 @@ async function enviarAccion(payload){
 function init(){
   document.getElementById("todayChip").textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
 
-  document.querySelectorAll("#plantTabs .tab").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      document.querySelectorAll("#plantTabs .tab").forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active");
-      plantaFiltro = btn.dataset.plant;
-      render();
-    });
-  });
-
   document.querySelectorAll("#vistaTabs .tab").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       document.querySelectorAll("#vistaTabs .tab").forEach(b=>b.classList.remove("active"));
@@ -1493,15 +1481,6 @@ function init(){
       document.getElementById("accionesIngresos").style.display = modoApp === "ingresos" ? "flex" : "none";
       document.getElementById("accionesEgresos").style.display = modoApp === "egresos" ? "flex" : "none";
       if(modoApp === "egresos") renderEgresos();
-    });
-  });
-
-  document.querySelectorAll("#plantTabsEgreso .tab").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      document.querySelectorAll("#plantTabsEgreso .tab").forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active");
-      plantaFiltroEgreso = btn.dataset.plant;
-      renderEgresos();
     });
   });
 
@@ -1550,6 +1529,30 @@ function init(){
 function toggleSoloPurgados(){
   soloPurgados = !soloPurgados;
   render();
+}
+
+/* Pestañas de Planta en Ingresos: "Todas" + una por cada planta conocida
+   (la lista maestra Plantas, más cualquiera que ya aparezca en los datos,
+   por si quedó algo cargado antes de que existiera la hoja Plantas). */
+function poblarPlantaTabs(){
+  const plantasPresentes = [...new Set([...PLANTAS, ...ingresos.map(i => i.planta)].filter(Boolean))].sort();
+  const cont = document.getElementById("plantTabs");
+  const activo = plantaFiltro;
+
+  let html = `<button class="tab ${activo==="Todas" ? "active" : ""}" data-plant="Todas">Todas</button>`;
+  plantasPresentes.forEach(p => {
+    const isActive = activo === p;
+    html += `<button class="tab ${isActive ? "active" : ""}" data-plant="${p}">${p}</button>`;
+  });
+  cont.innerHTML = html;
+
+  cont.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      plantaFiltro = btn.dataset.plant;
+      poblarPlantaTabs();
+      render();
+    });
+  });
 }
 
 function poblarCerealTabs(){
@@ -2501,6 +2504,29 @@ function poblarFiltrosEgreso(cerealParaFiltrarCupo){
   if(dlCupo) dlCupo.innerHTML = pend.map(c => `<option value="${c.codigoCupo}">${c.cliente} — ${c.cereal}</option>`).join("");
 }
 
+/* Mismo criterio para las pestañas de Planta en Egresos. */
+function poblarPlantaTabsEgreso(){
+  const cont = document.getElementById("plantTabsEgreso");
+  if(!cont) return;
+  const plantasPresentes = [...new Set([...PLANTAS, ...egresos.map(eg => eg.planta)].filter(Boolean))].sort();
+  const activo = plantaFiltroEgreso;
+
+  let html = `<button class="tab ${activo==="Todas" ? "active" : ""}" data-plant="Todas">Todas</button>`;
+  plantasPresentes.forEach(p => {
+    const isActive = activo === p;
+    html += `<button class="tab ${isActive ? "active" : ""}" data-plant="${p}">${p}</button>`;
+  });
+  cont.innerHTML = html;
+
+  cont.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      plantaFiltroEgreso = btn.dataset.plant;
+      poblarPlantaTabsEgreso();
+      renderEgresos();
+    });
+  });
+}
+
 function poblarCerealTabsEgreso(){
   const cerealesPresentes = [...new Set([...cupos.map(c=>c.cereal), ...egresos.map(eg=>eg.cereal)].filter(Boolean))].sort();
   const cont = document.getElementById("cerealTabsEgreso");
@@ -2528,6 +2554,7 @@ function renderEgresos(){
   if(!document.getElementById("cuposPendientes")) return;
 
   poblarFiltrosEgreso();
+  poblarPlantaTabsEgreso();
   poblarCerealTabsEgreso();
 
   const asignados = codigosCupoAsignados();

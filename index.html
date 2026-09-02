@@ -1295,6 +1295,8 @@ const COLOR_POR_ETAPA = [
   { c:"var(--rust)",   s:"var(--rust-soft)"   }, // Descargando
   { c:"var(--green)",  s:"var(--green-soft)"  }, // Finalizado
 ];
+// Un emoji por etapa, para identificarla de un vistazo
+const EMOJI_POR_ETAPA = ["🚛", "📍", "🧪", "🚚💨", "✅"];
 
 const CEREALES = {
   "Trigo":             { emoji:"🌾", color:"#8A6A1E", bg:"#F3E2BC" },
@@ -1332,6 +1334,7 @@ const COLOR_POR_ETAPA_EGRESO = [
   { c:"var(--rust)",  s:"var(--rust-soft)"  }, // Cargando
   { c:"var(--green)", s:"var(--green-soft)" }, // Finalizado
 ];
+const EMOJI_POR_ETAPA_EGRESO = ["🚛", "📍", "🚚💨", "✅"];
 
 /* Busca un valor entre varios nombres de columna posibles,
    sin importar mayúsculas/minúsculas ni espacios
@@ -1714,7 +1717,7 @@ function pipelineHTML(i){
     }
     const time = idx===1 ? i.horaArribo : idx===2 ? i.horaCalado : idx===4 ? i.horaFin : "";
     const humedadHTML = (idx===2 && i.humedad) ? `<div class="time" style="color:var(--violet);font-weight:600;">H: ${i.humedad}%</div>` : "";
-    return `<div class="${cls}"${estiloExtra}><div class="dot"></div><div class="lbl">${s}</div><div class="time">${time||""}</div>${humedadHTML}</div>`;
+    return `<div class="${cls}"${estiloExtra}><div class="dot"></div><div class="lbl">${EMOJI_POR_ETAPA[idx]} ${s}</div><div class="time">${time||""}</div>${humedadHTML}</div>`;
   }).join("");
 }
 
@@ -1977,7 +1980,7 @@ function compactHTML(i){
           <span class="compact-campo">${i.campo}</span>
           <span class="compact-chofer">${i.chofer}</span>
         </div>
-        <span class="compact-etapa" style="background:${COLOR_POR_ETAPA[i.estado].s}; color:${COLOR_POR_ETAPA[i.estado].c}; padding:3px 8px; border-radius:5px; font-weight:600;">${etapaActual}</span>
+        <span class="compact-etapa" style="background:${COLOR_POR_ETAPA[i.estado].s}; color:${COLOR_POR_ETAPA[i.estado].c}; padding:3px 8px; border-radius:5px; font-weight:600;">${EMOJI_POR_ETAPA[i.estado]} ${etapaActual}</span>
         ${i.parcial ? `<span class="compact-etapa" style="background:var(--purga-soft); color:var(--purga);">🔄 Purgado</span>` : ""}
         ${i.humedad ? `<span class="compact-humedad">H: ${i.humedad}%</span>` : ""}
         <span class="plant-tag ${plantClass}">${i.planta}</span>
@@ -2714,7 +2717,7 @@ function pipelineEgresoHTML(eg){
       estiloExtra = ` style="--color-etapa:${col.c};--color-etapa-soft:${col.s};"`;
     }
     const time = idx===1 ? eg.horaArribo : idx===2 ? eg.horaCargando : idx===3 ? eg.horaFin : "";
-    return `<div class="${cls}"${estiloExtra}><div class="dot"></div><div class="lbl">${s}</div><div class="time">${time||""}</div></div>`;
+    return `<div class="${cls}"${estiloExtra}><div class="dot"></div><div class="lbl">${EMOJI_POR_ETAPA_EGRESO[idx]} ${s}</div><div class="time">${time||""}</div></div>`;
   }).join("");
 }
 
@@ -2822,7 +2825,7 @@ function compactEgresoHTML(eg){
           <span class="compact-campo">${origenTag} ${eg.origen || ""}</span>
           <span class="compact-chofer">${eg.chofer}</span>
         </div>
-        <span class="compact-etapa" style="background:${COLOR_POR_ETAPA_EGRESO[eg.estado].s}; color:${COLOR_POR_ETAPA_EGRESO[eg.estado].c}; padding:3px 8px; border-radius:5px; font-weight:600;">${etapaActual}</span>
+        <span class="compact-etapa" style="background:${COLOR_POR_ETAPA_EGRESO[eg.estado].s}; color:${COLOR_POR_ETAPA_EGRESO[eg.estado].c}; padding:3px 8px; border-radius:5px; font-weight:600;">${EMOJI_POR_ETAPA_EGRESO[eg.estado]} ${etapaActual}</span>
         <span class="plant-tag ${plantClass}">${eg.planta}</span>
         <span class="compact-caret">${abierto ? "▲" : "▼"}</span>
       </div>

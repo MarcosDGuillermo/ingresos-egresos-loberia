@@ -1139,10 +1139,7 @@
       </div>
       <div>
         <label for="ePlanta">Planta</label>
-        <select id="ePlanta">
-          <option>Mónaco</option>
-          <option>La Virgen</option>
-        </select>
+        <input type="text" id="ePlanta" list="plantaListDL" placeholder="Escribí o elegí una planta" autocomplete="off">
       </div>
       <div>
         <label for="eChofer">Chofer / Transporte</label>
@@ -2752,6 +2749,9 @@ function actionsEgresoHTML(eg){
     const etiqueta = (esUltimoPaso && !eg.codigoCupo) ? "Finalizar y asignar cupo" : `Avanzar a ${STAGES_EGRESO[eg.estado+1]}`;
     actions += `<button class="btn-ghost advance" onclick="avanzarEgreso('${eg.id}')">${etiqueta}</button>`;
   }
+  if(eg.estado < 2){
+    actions += `<button class="btn-ghost" style="border-color:var(--rust); color:var(--rust);" onclick="saltarCargando('${eg.id}')">⏩ Directo a Cargando</button>`;
+  }
   actions += `<button class="btn-ghost link" onclick="editarEgresoUI('${eg.id}')">Editar datos</button>`;
   if(eg.chofer && eg.chofer !== "—"){
     actions += `<button class="btn-ghost link" onclick="compartirTransporte('${eg.chofer}')">📤 Compartir transporte</button>`;
@@ -2919,6 +2919,21 @@ async function confirmarFinalizarEgreso(){
     boton.textContent = textoOriginal;
     boton.disabled = false;
   }
+}
+
+/* Salta directo a Cargando, para camiones cuyo arribo se controló afuera
+   de la app (ej. en otra planta). Completa automáticamente la hora de
+   Arribo con el horario actual, así el orden de las tarjetas no se rompe. */
+async function saltarCargando(id){
+  const eg = egresos.find(x=>x.id===id);
+  if(!eg) return;
+
+  if(!confirm(`¿Marcar directo como Cargando? Se va a completar la hora de arribo (si faltaba) con el horario actual.`)) return;
+
+  try{
+    await enviarAccion({ accion: "saltarCargando", id });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo saltar el estado: " + err.message); }
 }
 
 async function retrocederEgreso(id){

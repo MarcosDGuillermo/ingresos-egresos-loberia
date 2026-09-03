@@ -1854,6 +1854,9 @@ function actionsHTML(i){
   if(i.estado < 4){
     actions += `<button class="btn-ghost advance" onclick="avanzar('${i.id}')">Avanzar a ${STAGES[i.estado+1]}</button>`;
   }
+  if(i.estado < 3){
+    actions += `<button class="btn-ghost" style="border-color:var(--rust); color:var(--rust);" onclick="saltarDescargando('${i.id}')">⏩ Directo a Descargando</button>`;
+  }
   actions += `<button class="btn-ghost link" onclick="editarObs('${i.id}')">Editar observaciones</button>`;
   actions += `<button class="btn-ghost link" onclick="editarIngresoUI('${i.id}')">Editar datos</button>`;
   if(i.chofer && i.chofer !== "—"){
@@ -2006,6 +2009,24 @@ async function avanzar(id){
     await enviarAccion({ accion: "avanzar", id, humedad });
     await cargarDatos();
   }catch(err){ alert("No se pudo avanzar el estado: " + err.message); }
+}
+
+/* Salta directo a Descargando, para camiones cuyo arribo/calado se
+   controló afuera de la app (ej. en otra planta). Completa automáticamente
+   las horas intermedias que falten, así el orden de las tarjetas no se rompe. */
+async function saltarDescargando(id){
+  const ing = ingresos.find(x=>x.id===id);
+  if(!ing) return;
+
+  const humedad = prompt("Humedad medida (%) — dejalo vacío si no la tenés:", "");
+  if(humedad === null) return; // canceló
+
+  if(!confirm(`¿Marcar directo como Descargando? Se va a completar la hora de arribo (si faltaba) y la de calado con el horario actual.`)) return;
+
+  try{
+    await enviarAccion({ accion: "saltarDescargando", id, humedad });
+    await cargarDatos();
+  }catch(err){ alert("No se pudo saltar el estado: " + err.message); }
 }
 
 async function retroceder(id){

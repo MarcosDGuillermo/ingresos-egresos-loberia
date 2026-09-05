@@ -852,6 +852,7 @@
   </select>
   <input type="text" id="buscador" class="search-input" placeholder="Buscar por cliente, campo o chofer…" oninput="render()">
   <button id="btnSoloPurgados" class="btn-ghost" onclick="toggleSoloPurgados()" style="white-space:nowrap;">🔄 Solo purgados</button>
+  <button id="btnSoloSinCP" class="btn-ghost" onclick="toggleSoloSinCartaPorte()" style="white-space:nowrap;">⚠️ Solo sin carta de porte</button>
 </div>
 
 <div class="toolbar filters-row" id="cerealFiltroRow">
@@ -1324,6 +1325,7 @@ let plantaFiltro = "Todas";
 let vistaModo = "tarjetas";
 let cerealFiltro = "Todos";
 let soloPurgados = false;
+let soloSinCartaPorte = false;
 let modoApp = "ingresos";
 let plantaFiltroEgreso = "Todas";
 let origenFiltroEgreso = "Todos";
@@ -1536,6 +1538,11 @@ function toggleSoloPurgados(){
   render();
 }
 
+function toggleSoloSinCartaPorte(){
+  soloSinCartaPorte = !soloSinCartaPorte;
+  render();
+}
+
 /* Pestañas de Planta en Ingresos: "Todas" + una por cada planta conocida
    (la lista maestra Plantas, más cualquiera que ya aparezca en los datos,
    por si quedó algo cargado antes de que existiera la hoja Plantas). */
@@ -1628,6 +1635,7 @@ function render(){
     })
     .filter(i => cerealFiltro === "Todos" || i.cereal === cerealFiltro)
     .filter(i => !soloPurgados || i.parcial)
+    .filter(i => !soloSinCartaPorte || i.sinCartaPorte)
     .filter(i => {
       if(!busqueda) return true;
       return (i.cliente || "").toLowerCase().includes(busqueda) ||
@@ -1692,6 +1700,19 @@ function render(){
     btnPurgados.style.background = "";
     btnPurgados.style.color = "";
     btnPurgados.style.borderColor = "";
+  }
+
+  const sinCPEnProceso = ingresos.filter(i => i.sinCartaPorte && i.estado < 4).length;
+  const btnSinCP = document.getElementById("btnSoloSinCP");
+  btnSinCP.textContent = `⚠️ Solo sin carta de porte (${sinCPEnProceso})`;
+  if(soloSinCartaPorte){
+    btnSinCP.style.background = "#e8a300";
+    btnSinCP.style.color = "#fff";
+    btnSinCP.style.borderColor = "#e8a300";
+  }else{
+    btnSinCP.style.background = "";
+    btnSinCP.style.color = "";
+    btnSinCP.style.borderColor = "";
   }
 
   if(visibles.length === 0){

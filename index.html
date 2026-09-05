@@ -996,6 +996,10 @@
         <label for="fObs">Observaciones</label>
         <input type="text" id="fObs" placeholder="Opcional">
       </div>
+      <div class="full" style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="fSinCP" style="width:auto;">
+        <label for="fSinCP" style="margin:0; cursor:pointer;">⚠️ No tiene carta de porte</label>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
@@ -1392,6 +1396,7 @@ async function cargarDatos(mostrarError = true){
       obs: campo(i, "Observaciones"),
       humedad: campo(i, "Humedad"),
       orden: campo(i, "Orden"),
+      sinCartaPorte: campo(i, "SinCartaPorte") === true || campo(i, "SinCartaPorte") === "TRUE" || campo(i, "SinCartaPorte") === "Sí",
     }));
 
     cupos = (data.cupos || []).map(c => ({
@@ -1881,6 +1886,7 @@ function cardHTML(i){
         <div style="display:flex; align-items:center; gap:8px;">
           <span class="cereal-badge" style="background:${cer.bg}; color:${cer.color};">${cer.emoji} ${i.cereal}</span>
           ${i.parcial ? `<span class="cereal-badge" style="background:var(--purga-soft); color:var(--purga);">🔄 Purgado</span>` : ""}
+          ${i.sinCartaPorte ? `<span class="cereal-badge" style="background:#fff3cd; color:#8a6d00;" title="Sin carta de porte">⚠️</span>` : ""}
           <span class="plant-tag ${plantClass}">${i.planta}</span>
         </div>
       </div>
@@ -1982,6 +1988,7 @@ function compactHTML(i){
         </div>
         <span class="compact-etapa" style="background:${COLOR_POR_ETAPA[i.estado].s}; color:${COLOR_POR_ETAPA[i.estado].c}; padding:3px 8px; border-radius:5px; font-weight:600;">${EMOJI_POR_ETAPA[i.estado]} ${etapaActual}</span>
         ${i.parcial ? `<span class="compact-etapa" style="background:var(--purga-soft); color:var(--purga);">🔄 Purgado</span>` : ""}
+        ${i.sinCartaPorte ? `<span class="compact-etapa" style="background:#fff3cd; color:#8a6d00;" title="Sin carta de porte">⚠️</span>` : ""}
         ${i.humedad ? `<span class="compact-humedad">H: ${i.humedad}%</span>` : ""}
         <span class="plant-tag ${plantClass}">${i.planta}</span>
         <span class="compact-caret">${abierto ? "▲" : "▼"}</span>
@@ -2081,6 +2088,7 @@ function openModal(){
   document.getElementById("modalTitulo").textContent = "Nuevo ingreso";
   document.getElementById("modalHint").textContent = "Cargá los datos del camión que llega a descargar. El cupo no aplica acá — es solo para egresos.";
   document.getElementById("modalBtnGuardar").textContent = "Registrar ingreso";
+  document.getElementById("fSinCP").checked = false;
   document.getElementById("modalOverlay").classList.add("open");
 }
 
@@ -2100,6 +2108,7 @@ function editarIngresoUI(id){
   document.getElementById("fChofer").value = ing.chofer === "—" ? "" : ing.chofer;
   document.getElementById("fDominio").value = ing.dominio === "—" ? "" : ing.dominio;
   document.getElementById("fObs").value = ing.obs || "";
+  document.getElementById("fSinCP").checked = !!ing.sinCartaPorte;
   actualizarCamposDatalist();
 
   document.getElementById("modalOverlay").classList.add("open");
@@ -2108,6 +2117,7 @@ function editarIngresoUI(id){
 function closeModal(){
   document.getElementById("modalOverlay").classList.remove("open");
   ["fCliente","fCampo","fCereal","fChofer","fDominio","fObs"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("fSinCP").checked = false;
   document.getElementById("choferNuevoAviso").style.display = "none";
   document.getElementById("clienteNuevoAviso").style.display = "none";
   editandoId = null;
@@ -2145,6 +2155,7 @@ async function guardarModal(){
     dominio: document.getElementById("fDominio").value,
     planta,
     observaciones: document.getElementById("fObs").value,
+    sinCartaPorte: document.getElementById("fSinCP").checked,
   };
 
   try{

@@ -1702,9 +1702,9 @@ function render(){
     btnPurgados.style.borderColor = "";
   }
 
-  const sinCPEnProceso = ingresos.filter(i => i.sinCartaPorte && i.estado < 4).length;
+  const sinCPTotal = ingresos.filter(i => i.sinCartaPorte).length;
   const btnSinCP = document.getElementById("btnSoloSinCP");
-  btnSinCP.textContent = `⚠️ Solo sin carta de porte (${sinCPEnProceso})`;
+  btnSinCP.textContent = `⚠️ Solo sin carta de porte (${sinCPTotal})`;
   if(soloSinCartaPorte){
     btnSinCP.style.background = "#e8a300";
     btnSinCP.style.color = "#fff";

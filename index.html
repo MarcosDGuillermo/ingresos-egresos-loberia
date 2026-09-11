@@ -1354,14 +1354,19 @@ function campo(obj, ...posibles){
 }
 
 /* ---------- Carga de datos desde el Sheet ---------- */
-async function cargarDatos(mostrarError = true){
+async function cargarDatos(mostrarError = true, liviano = false){
   try{
     cargando = true;
-    const res = await fetch(API_URL);
+    // Modo liviano: pide solo ingresos/egresos/cupos (?solo=movimientos) y
+    // saltea las listas maestras (clientes, transportes, corredores, destinos,
+    // plantas), que cambian muy poco. Se usa para el refresco periódico.
+    const res = await fetch(liviano ? API_URL + "?solo=movimientos" : API_URL);
     if(!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
 
-    TRANSPORTES = (data.transportes || []).map(t => ({
+    // Las listas maestras solo se pisan si vinieron en la respuesta
+    // (en modo liviano no vienen y se conservan las que ya estaban).
+    if(data.transportes) TRANSPORTES = data.transportes.map(t => ({
       chofer: campo(t, "NombreChofer"),
       cuitChofer: campo(t, "CUITChofer"),
       nombreTransporte: campo(t, "NombreTransporte"),
@@ -1372,7 +1377,7 @@ async function cargarDatos(mostrarError = true){
       pesoBrutoMaximo: campo(t, "PesoBrutoMaximo"),
     }));
 
-    CLIENTES = (data.clientes || []).map(c => ({
+    if(data.clientes) CLIENTES = data.clientes.map(c => ({
       cliente: campo(c, "Cliente", "Clientes"),
       campo: campo(c, "Campo"),
       km: campo(c, "Km"),
@@ -1432,9 +1437,10 @@ async function cargarDatos(mostrarError = true){
       obs: campo(eg, "Observaciones"),
     }));
 
-    CORREDORES = data.corredores || [];
-    DESTINOS = data.destinos || [];
-    PLANTAS = data.plantas && data.plantas.length ? data.plantas : ["Mónaco", "La Virgen"];
+    if(data.corredores) CORREDORES = data.corredores;
+    if(data.destinos) DESTINOS = data.destinos;
+    if(data.plantas && data.plantas.length) PLANTAS = data.plantas;
+    else if(!PLANTAS.length) PLANTAS = ["Mónaco", "La Virgen"];
 
     poblarListas();
     poblarPlantaTabs();
@@ -1463,6 +1469,100 @@ async function enviarAccion(payload){
   const data = await res.json();
   if(!data.ok) throw new Error(data.error || "Error desconocido");
   return data.resultado;
+}
+
+/* ---------- Acciones optimistas ----------
+   Antes, cada clic esperaba la respuesta del Sheet y recién ahí volvía a
+   bajar TODAS las hojas para repintar: entre 4 y 6 segundos de espera.
+   Ahora el cambio se pinta en pantalla al instante y el POST viaja en
+   segundo plano. El refresco periódico trae después el estado real.
+   Si el backend rechaza la acción, se revierte lo pintado y se avisa. */
+let operacionesPendientes = 0;
+
+function repintar(){
+  render();
+  renderEgresos();
+}
+
+function dosDigitos(n){
+  return String(n).padStart(2, "0");
+}
+
+/* Mismo formato que escribe el backend: "HH:mm:ss" */
+function horaLocalAhora(){
+  const d = new Date();
+  return `${dosDigitos(d.getHours())}:${dosDigitos(d.getMinutes())}:${dosDigitos(d.getSeconds())}`;
+}
+
+/* Mismo formato que devuelve el backend para Fecha / FechaFin: "dd/MM/yyyy" */
+function fechaLocalHoy(){
+  const d = new Date();
+  return `${dosDigitos(d.getDate())}/${dosDigitos(d.getMonth() + 1)}/${d.getFullYear()}`;
+}
+
+/* Copia de los datos locales, para poder volver atrás si el POST falla */
+function copiaEstado(){
+  return JSON.stringify({ ingresos, egresos, cupos });
+}
+
+function restaurarEstado(copia){
+  const previo = JSON.parse(copia);
+  ingresos = previo.ingresos;
+  egresos  = previo.egresos;
+  cupos    = previo.cupos;
+  repintar();
+}
+
+async function accionOptimista(payload, aplicarLocal, mensajeError){
+  const copia = copiaEstado();
+  aplicarLocal();
+  repintar();
+
+  operacionesPendientes++;
+  try{
+    await enviarAccion(payload);
+  }catch(err){
+    restaurarEstado(copia);
+    alert(mensajeError + ": " + err.message);
+  }finally{
+    operacionesPendientes--;
+  }
+}
+
+/* El backend da de alta solo los clientes, choferes y plantas que no
+   conocía. Replicamos eso en memoria para no tener que volver a bajar
+   las listas maestras del Sheet por un nombre nuevo. */
+function aprenderMaestros(datos){
+  const nombreCliente = datos.cliente || "";
+  const nombreCampo = datos.campo || "";
+  const nombreChofer = datos.chofer || "";
+  const nombrePlanta = datos.planta || "";
+  let huboCambios = false;
+
+  if(nombreCliente && !CLIENTES.some(c => c.cliente === nombreCliente && (c.campo || "") === nombreCampo)){
+    CLIENTES.push({ cliente: nombreCliente, campo: nombreCampo, km: "" });
+    huboCambios = true;
+  }
+
+  if(nombreChofer && !TRANSPORTES.some(t => t.chofer === nombreChofer)){
+    const partes = String(datos.dominio || "").split("/").map(p => p.trim());
+    TRANSPORTES.push({
+      chofer: nombreChofer, cuitChofer: "", nombreTransporte: "", cuitTransporte: "",
+      dominioChasis: partes[0] || "", dominioAcoplado: partes[1] || "",
+      escalable: "NO", pesoBrutoMaximo: "",
+    });
+    huboCambios = true;
+  }
+
+  if(nombrePlanta && !PLANTAS.includes(nombrePlanta)){
+    PLANTAS.push(nombrePlanta);
+    huboCambios = true;
+  }
+
+  if(huboCambios){
+    poblarListas();
+    poblarPlantaTabs();
+  }
 }
 
 /* ---------- Init ---------- */
@@ -1530,7 +1630,11 @@ function init(){
   });
 
   cargarDatos();
-  setInterval(() => cargarDatos(false), REFRESCO_MS);
+  // Refresco periódico liviano. Si hay una acción viajando al Sheet se saltea
+  // el turno: traer el estado viejo pisaría el cambio que ya está en pantalla.
+  setInterval(() => {
+    if(operacionesPendientes === 0) cargarDatos(false, true);
+  }, REFRESCO_MS);
 }
 
 function toggleSoloPurgados(){
@@ -1962,12 +2066,13 @@ async function onDropQueueItem(e, targetId){
   const ordenes = ids.map((id, idx) => ({ id, orden: idx + 1 }));
   draggedIngresoId = null;
 
-  try{
-    await enviarAccion({ accion: "actualizarOrdenIngresos", ordenes });
-    await cargarDatos();
-  }catch(err){
-    alert("No se pudo reordenar: " + err.message);
-  }
+  accionOptimista({ accion: "actualizarOrdenIngresos", ordenes }, () => {
+    const porId = {};
+    ordenes.forEach(o => { porId[o.id] = o.orden; });
+    ingresos.forEach(i => {
+      if(porId[i.id] !== undefined) i.orden = porId[i.id];
+    });
+  }, "No se pudo reordenar");
 }
 
 function toggleExpandido(id){
@@ -2020,20 +2125,34 @@ function compactHTML(i){
 }
 
 /* ---------- Acciones ---------- */
-async function avanzar(id){
+function avanzar(id){
   const ing = ingresos.find(x=>x.id===id);
-  let humedad;
+  if(!ing || ing.estado >= 4) return;
 
+  let humedad;
   // Si está pasando de Arribo (1) a Calado (2), pedimos la humedad medida
-  if(ing && ing.estado === 1){
+  if(ing.estado === 1){
     humedad = prompt("Humedad medida (%):", "");
     if(humedad === null) return; // canceló, no avanza el estado
   }
 
-  try{
-    await enviarAccion({ accion: "avanzar", id, humedad });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo avanzar el estado: " + err.message); }
+  const nuevoEstado = ing.estado + 1;
+  const ahora = horaLocalAhora();
+
+  accionOptimista({ accion: "avanzar", id, humedad }, () => {
+    const i = ingresos.find(x=>x.id===id);
+    if(!i) return;
+    i.estado = nuevoEstado;
+    if(nuevoEstado === 1) i.horaArribo = ahora;
+    if(nuevoEstado === 2){
+      i.horaCalado = ahora;
+      if(humedad !== undefined && humedad !== "") i.humedad = humedad;
+    }
+    if(nuevoEstado === 4){
+      i.horaFin = ahora;
+      i.fechaFin = fechaLocalHoy();
+    }
+  }, "No se pudo avanzar el estado");
 }
 
 /* Salta directo a Descargando, para camiones cuyo arribo/calado se
@@ -2048,10 +2167,16 @@ async function saltarDescargando(id){
 
   if(!confirm(`¿Marcar directo como Descargando? Se va a completar la hora de arribo (si faltaba) y la de calado con el horario actual.`)) return;
 
-  try{
-    await enviarAccion({ accion: "saltarDescargando", id, humedad });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo saltar el estado: " + err.message); }
+  const ahora = horaLocalAhora();
+
+  accionOptimista({ accion: "saltarDescargando", id, humedad }, () => {
+    const i = ingresos.find(x=>x.id===id);
+    if(!i) return;
+    if(!i.horaArribo) i.horaArribo = ahora;
+    i.horaCalado = ahora;
+    if(humedad !== undefined && humedad !== "") i.humedad = humedad;
+    i.estado = 3;
+  }, "No se pudo saltar el estado");
 }
 
 async function retroceder(id){
@@ -2067,27 +2192,43 @@ async function retroceder(id){
   const ok = confirm(`¿Volver el ingreso ${id} a la etapa "${etapaAnterior}"?${advertencia}`);
   if(!ok) return;
 
-  try{
-    await enviarAccion({ accion: "retroceder", id });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo retroceder el estado: " + err.message); }
+  const nuevoEstado = ing.estado - 1;
+
+  accionOptimista({ accion: "retroceder", id }, () => {
+    const i = ingresos.find(x=>x.id===id);
+    if(!i) return;
+    i.estado = nuevoEstado;
+    if(nuevoEstado < 1) i.horaArribo = "";
+    if(nuevoEstado < 2){ i.horaCalado = ""; i.humedad = ""; }
+    if(nuevoEstado < 4){ i.horaFin = ""; i.fechaFin = ""; }
+  }, "No se pudo retroceder el estado");
 }
 
 async function togglePlanta(id){
   const ing = ingresos.find(x=>x.id===id);
   if(!ing) return;
-  try{
-    if(ing.parcial){
-      await enviarAccion({ accion: "quitarParcial", id });
-      await cargarDatos();
-      return;
-    }
-    const otra = ing.planta === "Mónaco" ? "La Virgen" : "Mónaco";
-    const cantidad = prompt(`¿Cuánto descargó ya en Planta ${otra}? (ej: 10.000 kg)`);
-    if(cantidad === null) return;
-    await enviarAccion({ accion: "marcarParcial", id, plantaParcial: otra, cantidadParcial: cantidad });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo actualizar: " + err.message); }
+  if(ing.parcial){
+    accionOptimista({ accion: "quitarParcial", id }, () => {
+      const i = ingresos.find(x=>x.id===id);
+      if(!i) return;
+      i.parcial = false;
+      i.plantaParcial = "";
+      i.cantidadParcial = "";
+    }, "No se pudo actualizar");
+    return;
+  }
+
+  const otra = ing.planta === "Mónaco" ? "La Virgen" : "Mónaco";
+  const cantidad = prompt(`¿Cuánto descargó ya en Planta ${otra}? (ej: 10.000 kg)`);
+  if(cantidad === null) return;
+
+  accionOptimista({ accion: "marcarParcial", id, plantaParcial: otra, cantidadParcial: cantidad }, () => {
+    const i = ingresos.find(x=>x.id===id);
+    if(!i) return;
+    i.parcial = true;
+    i.plantaParcial = otra;
+    i.cantidadParcial = cantidad;
+  }, "No se pudo actualizar");
 }
 
 async function editarObs(id){
@@ -2095,10 +2236,10 @@ async function editarObs(id){
   if(!ing) return;
   const nueva = prompt("Observaciones:", ing.obs || "");
   if(nueva === null) return;
-  try{
-    await enviarAccion({ accion: "editarObservaciones", id, observaciones: nueva });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo guardar la observación: " + err.message); }
+  accionOptimista({ accion: "editarObservaciones", id, observaciones: nueva }, () => {
+    const i = ingresos.find(x=>x.id===id);
+    if(i) i.obs = nueva;
+  }, "No se pudo guardar la observación");
 }
 
 /* ---------- Modal / alta y edición ---------- */
@@ -2179,14 +2320,58 @@ async function guardarModal(){
     sinCartaPorte: document.getElementById("fSinCP").checked,
   };
 
+  const idEditado = editandoId;
+  closeModal(); // cierra al toque: el guardado sigue en segundo plano
+
   try{
-    if(editandoId){
-      await enviarAccion({ accion: "editarIngreso", id: editandoId, ...datos });
+    if(idEditado){
+      accionOptimista({ accion: "editarIngreso", id: idEditado, ...datos }, () => {
+        const i = ingresos.find(x=>x.id===idEditado);
+        if(!i) return;
+        i.cliente = datos.cliente;
+        i.campo = datos.campo;
+        i.cereal = datos.cereal;
+        i.chofer = datos.chofer || "—";
+        i.dominio = datos.dominio || "—";
+        i.planta = datos.planta;
+        i.obs = datos.observaciones;
+        i.sinCartaPorte = datos.sinCartaPorte;
+      }, "No se pudo guardar");
+      aprenderMaestros(datos);
     }else{
-      await enviarAccion({ accion: "crear", ...datos });
+      // El ID lo asigna el Sheet, así que el alta sí espera la respuesta.
+      // Pero después arma la tarjeta en memoria, en vez de volver a bajar todo.
+      operacionesPendientes++;
+      try{
+        const resultado = await enviarAccion({ accion: "crear", ...datos });
+        ingresos.push({
+          id: resultado.id,
+          fecha: fechaLocalHoy(),
+          fechaFin: "",
+          cliente: datos.cliente,
+          campo: datos.campo,
+          cereal: datos.cereal,
+          chofer: datos.chofer || "—",
+          dominio: datos.dominio || "—",
+          planta: datos.planta,
+          estado: 0,
+          horaArribo: "",
+          horaCalado: "",
+          horaFin: "",
+          parcial: false,
+          plantaParcial: "",
+          cantidadParcial: "",
+          obs: datos.observaciones,
+          humedad: "",
+          orden: "",
+          sinCartaPorte: datos.sinCartaPorte,
+        });
+        aprenderMaestros(datos);
+        repintar();
+      }finally{
+        operacionesPendientes--;
+      }
     }
-    closeModal();
-    await cargarDatos();
   }catch(err){
     alert("No se pudo guardar: " + err.message);
   }finally{
@@ -2202,12 +2387,9 @@ async function borrarIngresoUI(id){
   const ok = confirm(`¿Borrar el ingreso ${id} (${ing.cliente})?\n\nEsta acción no se puede deshacer.`);
   if(!ok) return;
 
-  try{
-    await enviarAccion({ accion: "borrarIngreso", id });
-    await cargarDatos();
-  }catch(err){
-    alert("No se pudo borrar: " + err.message);
-  }
+  accionOptimista({ accion: "borrarIngreso", id }, () => {
+    ingresos = ingresos.filter(x => x.id !== id);
+  }, "No se pudo borrar");
 }
 
 /* ---------- Nuevo cliente ---------- */
@@ -2467,7 +2649,7 @@ async function confirmarLimpieza(){
     const resultado = await enviarAccion({ accion, ...rango });
     alert(`Se borraron ${resultado.borrados} ${sustantivo}(s).`);
     closeMantenimiento();
-    await cargarDatos();
+    await cargarDatos(true, true);
   }catch(err){
     alert("No se pudo completar la limpieza: " + err.message);
   }
@@ -2890,9 +3072,9 @@ function compactEgresoHTML(eg){
 /* ---------- Acciones de Egresos ---------- */
 let egresoIdParaFinalizar = null;
 
-async function avanzarEgreso(id){
+function avanzarEgreso(id){
   const eg = egresos.find(x=>x.id===id);
-  if(!eg) return;
+  if(!eg || eg.estado >= 3) return;
 
   // Pasando de Cargando (2) a Finalizado (3)
   if(eg.estado === 2){
@@ -2904,21 +3086,46 @@ async function avanzarEgreso(id){
       poblarFiltrosEgreso();
       document.getElementById("finalizarOverlay").classList.add("open");
       return;
-    }else{
-      const cp = prompt("Carta de porte (opcional):", "");
-      if(cp === null) return; // canceló
-      try{
-        await enviarAccion({ accion: "avanzarEgreso", id, cartaPorte: cp });
-        await cargarDatos();
-      }catch(err){ alert("No se pudo finalizar: " + err.message); }
-      return;
     }
+    const cp = prompt("Carta de porte (opcional):", "");
+    if(cp === null) return; // canceló
+    finalizarEgreso(id, { cartaPorte: cp });
+    return;
   }
 
-  try{
-    await enviarAccion({ accion: "avanzarEgreso", id });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo avanzar el estado: " + err.message); }
+  const nuevoEstado = eg.estado + 1;
+  const ahora = horaLocalAhora();
+
+  accionOptimista({ accion: "avanzarEgreso", id }, () => {
+    const e = egresos.find(x=>x.id===id);
+    if(!e) return;
+    e.estado = nuevoEstado;
+    if(nuevoEstado === 1) e.horaArribo = ahora;
+    if(nuevoEstado === 2) e.horaCargando = ahora;
+  }, "No se pudo avanzar el estado");
+}
+
+/* Finaliza un egreso (Cargando -> Finalizado). Si viene un código de cupo,
+   completa además los datos que el cupo define (cliente, cereal, corredor,
+   destino), igual que hace el backend. */
+function finalizarEgreso(id, extra){
+  const ahora = horaLocalAhora();
+  const cupo = extra.codigoCupo ? cupos.find(c => c.codigoCupo === extra.codigoCupo) : null;
+
+  accionOptimista({ accion: "avanzarEgreso", id, ...extra }, () => {
+    const e = egresos.find(x=>x.id===id);
+    if(!e) return;
+    e.estado = 3;
+    e.horaFin = ahora;
+    e.fechaFin = fechaLocalHoy();
+    if(cupo){
+      e.codigoCupo = cupo.codigoCupo;
+      e.cliente = cupo.cliente;
+      e.cereal = cupo.cereal;
+      e.corredor = cupo.corredor;
+      e.destino = cupo.destino;
+    }
+  }, "No se pudo finalizar");
 }
 
 function closeFinalizarModal(){
@@ -2936,21 +3143,9 @@ async function confirmarFinalizarEgreso(){
     return;
   }
 
-  const boton = document.getElementById("finalizarBtnGuardar");
-  const textoOriginal = boton.textContent;
-  boton.textContent = "Guardando…";
-  boton.disabled = true;
-
-  try{
-    await enviarAccion({ accion: "avanzarEgreso", id: egresoIdParaFinalizar, codigoCupo, cartaPorte });
-    closeFinalizarModal();
-    await cargarDatos();
-  }catch(err){
-    alert("No se pudo finalizar: " + err.message);
-  }finally{
-    boton.textContent = textoOriginal;
-    boton.disabled = false;
-  }
+  const id = egresoIdParaFinalizar;
+  closeFinalizarModal(); // cierra al toque: el guardado sigue en segundo plano
+  finalizarEgreso(id, { codigoCupo, cartaPorte });
 }
 
 /* Salta directo a Cargando, para camiones cuyo arribo se controló afuera
@@ -2962,10 +3157,15 @@ async function saltarCargando(id){
 
   if(!confirm(`¿Marcar directo como Cargando? Se va a completar la hora de arribo (si faltaba) con el horario actual.`)) return;
 
-  try{
-    await enviarAccion({ accion: "saltarCargando", id });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo saltar el estado: " + err.message); }
+  const ahora = horaLocalAhora();
+
+  accionOptimista({ accion: "saltarCargando", id }, () => {
+    const e = egresos.find(x=>x.id===id);
+    if(!e) return;
+    if(!e.horaArribo) e.horaArribo = ahora;
+    e.horaCargando = ahora;
+    e.estado = 2;
+  }, "No se pudo saltar el estado");
 }
 
 async function retrocederEgreso(id){
@@ -2973,10 +3173,16 @@ async function retrocederEgreso(id){
   if(!eg || eg.estado <= 0) return;
   const ok = confirm(`¿Volver el camión de ${eg.cliente} a la etapa "${STAGES_EGRESO[eg.estado-1]}"?`);
   if(!ok) return;
-  try{
-    await enviarAccion({ accion: "retrocederEgreso", id });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo retroceder: " + err.message); }
+  const nuevoEstado = eg.estado - 1;
+
+  accionOptimista({ accion: "retrocederEgreso", id }, () => {
+    const e = egresos.find(x=>x.id===id);
+    if(!e) return;
+    e.estado = nuevoEstado;
+    if(nuevoEstado < 1) e.horaArribo = "";
+    if(nuevoEstado < 2) e.horaCargando = "";
+    if(nuevoEstado < 3){ e.horaFin = ""; e.fechaFin = ""; }
+  }, "No se pudo retroceder");
 }
 
 async function borrarEgresoUI(id){
@@ -2984,10 +3190,9 @@ async function borrarEgresoUI(id){
   if(!eg) return;
   const ok = confirm(`¿Borrar la asignación de ${eg.cliente} (cupo ${eg.codigoCupo || "—"})?\n\nSi estaba vinculado a un cupo, vuelve a quedar pendiente.`);
   if(!ok) return;
-  try{
-    await enviarAccion({ accion: "borrarEgreso", id });
-    await cargarDatos();
-  }catch(err){ alert("No se pudo borrar: " + err.message); }
+  accionOptimista({ accion: "borrarEgreso", id }, () => {
+    egresos = egresos.filter(x => x.id !== id);
+  }, "No se pudo borrar");
 }
 
 /* ---------- Modal asignar / crear / editar egreso ---------- */
@@ -3058,7 +3263,7 @@ async function borrarCupoUI(codigoCupo){
   if(!ok) return;
   try{
     await enviarAccion({ accion: "borrarCupo", codigoCupo });
-    await cargarDatos();
+    await cargarDatos(true, true);
   }catch(err){
     alert("No se pudo borrar: " + err.message);
   }
@@ -3118,7 +3323,7 @@ async function guardarNuevoCupo(){
       }
     }
     closeNuevoCupo();
-    await cargarDatos();
+    await cargarDatos(true, true);
   }catch(err){
     alert("No se pudo guardar el cupo: " + err.message);
   }finally{
@@ -3243,7 +3448,7 @@ async function guardarEgresoModal(){
       await enviarAccion({ accion: "crearEgreso", ...datos });
     }
     closeEgresoModal();
-    await cargarDatos();
+    await cargarDatos(true, true);
   }catch(err){
     alert("No se pudo guardar: " + err.message);
   }finally{

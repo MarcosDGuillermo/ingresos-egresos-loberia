@@ -1415,6 +1415,7 @@ async function cargarDatos(mostrarError = true, liviano = false){
       corredor: campo(c, "Corredor"),
       destino: campo(c, "Destino"),
       observaciones: campo(c, "Observaciones"),
+      prioridad: campo(c, "Prioridad"),
     })).filter(c => c.codigoCupo);
 
     egresos = (data.egresos || []).map(eg => ({
@@ -2679,6 +2680,60 @@ function setDestinoFiltro(valor){
   renderEgresos();
 }
 
+/* ---- Prioridad de cupos ----
+   Banderita de tres niveles para decidir qué cupo usar primero cuando
+   surge un problema. El botón de la tarjeta va ciclando:
+   sin prioridad → Alta → Media → Baja → sin prioridad. */
+const PRIORIDADES = ["Alta", "Media", "Baja"];
+const PRIORIDAD_INFO = {
+  "Alta":  { emoji: "🚩", color: "var(--rust)",     bg: "rgba(180,80,46,.12)", rank: 0 },
+  "Media": { emoji: "🚩", color: "var(--gold)",     bg: "var(--gold-soft)",    rank: 1 },
+  "Baja":  { emoji: "🚩", color: "var(--ink-soft)", bg: "var(--panel-2)",      rank: 2 },
+};
+
+/* Los cupos sin prioridad van al final (rank 3), no adelante. */
+function rankPrioridad(prioridad){
+  const info = PRIORIDAD_INFO[prioridad];
+  return info ? info.rank : 3;
+}
+
+function siguientePrioridad(prioridad){
+  const i = PRIORIDADES.indexOf(prioridad);
+  if(i === -1) return "Alta";
+  return PRIORIDADES[i + 1] || "";
+}
+
+function botonPrioridadHTML(c){
+  const info = PRIORIDAD_INFO[c.prioridad];
+  const estilo = info
+    ? `color:${info.color};background:${info.bg};`
+    : "color:var(--ink-soft);";
+  const texto = info ? `${info.emoji} ${c.prioridad}` : "⚐ Prioridad";
+  const ayuda = info
+    ? `Prioridad ${c.prioridad} — tocá para cambiar`
+    : "Sin prioridad — tocá para marcar";
+  return `<button class="btn-ghost link" style="${estilo}" title="${ayuda}" onclick="ciclarPrioridadCupo('${c.codigoCupo}')">${texto}</button>`;
+}
+
+/* Cambia la banderita al toque. La tarjeta se actualiza en el momento y,
+   si el backend rechaza el cambio, se vuelve atrás y se avisa. */
+async function ciclarPrioridadCupo(codigoCupo){
+  const cupo = cupos.find(c => c.codigoCupo === codigoCupo);
+  if(!cupo) return;
+
+  const anterior = cupo.prioridad;
+  cupo.prioridad = siguientePrioridad(anterior);
+  renderEgresos();
+
+  try{
+    await enviarAccion({ accion: "prioridadCupo", codigoCupo, prioridad: cupo.prioridad });
+  }catch(err){
+    cupo.prioridad = anterior;
+    renderEgresos();
+    alert("No se pudo cambiar la prioridad: " + err.message);
+  }
+}
+
 function codigosCupoAsignados(){
   return new Set(egresos.map(eg => eg.codigoCupo).filter(Boolean));
 }
@@ -2925,12 +2980,24 @@ function renderCuposPendientes(pendientes){
       (porCereal[c.cereal || "Sin cereal"] = porCereal[c.cereal || "Sin cereal"] || []).push(c);
     });
 
-    Object.keys(porCereal).forEach(cerealNombre => {
+    // Los grupos de cereal se ordenan por el cupo más urgente que tenga
+    // cada uno, así el cereal con una bandera Alta queda arriba.
+    const cerealesOrdenados = Object.keys(porCereal).sort((a, b) => {
+      const mejor = lista => Math.min(...lista.map(c => rankPrioridad(c.prioridad)));
+      return mejor(porCereal[a]) - mejor(porCereal[b]);
+    });
+
+    cerealesOrdenados.forEach(cerealNombre => {
       const cer = estiloCereal(cerealNombre);
       html += `<div class="cupo-cereal-group">
         <div class="cupo-cereal-label" style="background:${cer.bg};color:${cer.color};">${cer.emoji} ${cerealNombre} · ${porCereal[cerealNombre].length}</div>`;
 
-      porCereal[cerealNombre].forEach(c => {
+      // Dentro del grupo: primero Alta, después Media, Baja y sin prioridad.
+      const ordenados = porCereal[cerealNombre]
+        .slice()
+        .sort((a, b) => rankPrioridad(a.prioridad) - rankPrioridad(b.prioridad));
+
+      ordenados.forEach(c => {
         html += `
           <div class="cupo-row">
             <div class="cupo-row-main">
@@ -2939,6 +3006,7 @@ function renderCuposPendientes(pendientes){
             </div>
             <div class="cupo-row-acciones">
               <span class="cupo-codigo">${c.codigoCupo}</span>
+              ${botonPrioridadHTML(c)}
               <button class="btn-ghost advance" onclick="abrirAsignarCamion('${c.codigoCupo}')">Asignar camión</button>
               <button class="btn-ghost link" onclick="abrirEditarCupo('${c.codigoCupo}')">Editar</button>
               <button class="btn-ghost link" style="color:var(--rust);" onclick="borrarCupoUI('${c.codigoCupo}')">Borrar</button>

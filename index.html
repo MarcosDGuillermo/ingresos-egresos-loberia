@@ -896,10 +896,10 @@
   </div>
 
   <div class="toolbar filters-row">
-    <select id="corredorFiltro" class="search-input" style="max-width:180px;" onchange="renderEgresos()">
+    <select id="corredorFiltro" class="search-input" style="max-width:180px;" onchange="setCorredorFiltro(this.value)">
       <option value="Todos">Todos los corredores</option>
     </select>
-    <select id="destinoFiltro" class="search-input" style="max-width:180px;" onchange="renderEgresos()">
+    <select id="destinoFiltro" class="search-input" style="max-width:180px;" onchange="setDestinoFiltro(this.value)">
       <option value="Todos">Todos los destinos</option>
     </select>
   </div>
@@ -2666,6 +2666,19 @@ let cerealFiltroEgreso = "Todos";
 let rangoPendientes = "hoy";
 let expandidosEgreso = new Set();
 
+/* Los <select> de corredor y destino guardan lo elegido en estas variables
+   ANTES de re-renderizar. Sin esto, renderEgresos() se ejecutaba pero
+   corredorFiltro/destinoFiltro seguían en "Todos" y el filtro no hacía nada. */
+function setCorredorFiltro(valor){
+  corredorFiltro = valor || "Todos";
+  renderEgresos();
+}
+
+function setDestinoFiltro(valor){
+  destinoFiltro = valor || "Todos";
+  renderEgresos();
+}
+
 function codigosCupoAsignados(){
   return new Set(egresos.map(eg => eg.codigoCupo).filter(Boolean));
 }
@@ -2720,17 +2733,21 @@ function poblarFiltrosEgreso(cerealParaFiltrarCupo){
   cupos.forEach(c => { if(c.corredor) corredores.add(c.corredor); if(c.destino) destinos.add(c.destino); });
   egresos.forEach(eg => { if(eg.corredor) corredores.add(eg.corredor); if(eg.destino) destinos.add(eg.destino); });
 
+  // El desplegable se reconstruye en cada render, así que se lo vuelve a
+  // parar sobre el filtro activo. Si ese corredor/destino ya no existe
+  // (se borró el último cupo que lo usaba), el filtro se resetea a "Todos"
+  // en vez de quedar filtrando por algo que no se ve en la lista.
   const corredorSel = document.getElementById("corredorFiltro");
-  const corredorActual = corredorSel.value;
   corredorSel.innerHTML = '<option value="Todos">Todos los corredores</option>' +
     [...corredores].sort().map(c => `<option value="${c}">${c}</option>`).join("");
-  if([...corredores].includes(corredorActual)) corredorSel.value = corredorActual;
+  if(corredorFiltro !== "Todos" && !corredores.has(corredorFiltro)) corredorFiltro = "Todos";
+  corredorSel.value = corredorFiltro;
 
   const destinoSel = document.getElementById("destinoFiltro");
-  const destinoActual = destinoSel.value;
   destinoSel.innerHTML = '<option value="Todos">Todos los destinos</option>' +
     [...destinos].sort().map(d => `<option value="${d}">${d}</option>`).join("");
-  if([...destinos].includes(destinoActual)) destinoSel.value = destinoActual;
+  if(destinoFiltro !== "Todos" && !destinos.has(destinoFiltro)) destinoFiltro = "Todos";
+  destinoSel.value = destinoFiltro;
 
   const dlCorredor = document.getElementById("corredorListDL");
   if(dlCorredor) dlCorredor.innerHTML = [...corredores].sort().map(c=>`<option value="${c}"></option>`).join("");

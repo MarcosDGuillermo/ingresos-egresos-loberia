@@ -1241,6 +1241,29 @@
   </div>
 </div>
 
+<!-- ---------- Modal cupo cedido: se usó por fuera (acondicionadora, etc.) ---------- -->
+<div class="modal-overlay" id="cederOverlay">
+  <div class="modal">
+    <h2 id="cederTitulo">Cupo cedido</h2>
+    <div class="hint">Para cupos que se pasaron a otro lado y cargaron por su cuenta. Queda como egreso Finalizado, sin pasar por arribo ni carga.</div>
+    <div class="form-grid">
+      <div class="full" id="cederResumen" style="background:var(--panel-2); border-radius:8px; padding:10px 12px; font-size:12.5px; color:var(--ink-soft);"></div>
+      <div class="full">
+        <label for="cederDestinoNombre">Cedido a</label>
+        <input type="text" id="cederDestinoNombre" placeholder="Ej: nombre de la acondicionadora" autocomplete="off">
+      </div>
+      <div class="full">
+        <label for="cederCartaPorte">Carta de porte (opcional)</label>
+        <input type="text" id="cederCartaPorte" placeholder="Si ya la tenés">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCederCupo()">Cancelar</button>
+      <button class="btn-primary" id="cederBtnGuardar" onclick="confirmarCederCupo()">Marcar como cedido</button>
+    </div>
+  </div>
+</div>
+
 <!-- ---------- Modal buscar transporte (sin necesidad de un viaje cargado) ---------- -->
 <div class="modal-overlay" id="buscarTransporteOverlay">
   <div class="modal">
@@ -3008,6 +3031,7 @@ function renderCuposPendientes(pendientes){
               <span class="cupo-codigo">${c.codigoCupo}</span>
               ${botonPrioridadHTML(c)}
               <button class="btn-ghost advance" onclick="abrirAsignarCamion('${c.codigoCupo}')">Asignar camión</button>
+              <button class="btn-ghost link" title="El cupo se usó por fuera (ej. lo cargó una acondicionadora)" onclick="abrirCederCupo('${c.codigoCupo}')">Cedido</button>
               <button class="btn-ghost link" onclick="abrirEditarCupo('${c.codigoCupo}')">Editar</button>
               <button class="btn-ghost link" style="color:var(--rust);" onclick="borrarCupoUI('${c.codigoCupo}')">Borrar</button>
             </div>
@@ -3095,7 +3119,7 @@ function cardEgresoHTML(eg){
       </div>
 
       <div class="meta-row">
-        <div class="meta-item"><span class="label">Chofer</span><span class="value">${eg.chofer}</span></div>
+        <div class="meta-item"><span class="label">Chofer</span><span class="value">${eg.chofer || "—"}</span></div>
         <div class="meta-item"><span class="label">Dominio</span><span class="value mono">${eg.dominio}</span></div>
         <div class="meta-item"><span class="label">Cupo</span><span class="value mono">${eg.codigoCupo || "—"}</span></div>
       </div>
@@ -3295,6 +3319,71 @@ function limpiarFormEgreso(){
   document.getElementById("eChofer").value = "";
   document.getElementById("eDominio").value = "";
   document.getElementById("eObs").value = "";
+}
+
+/* ---------- Cupo cedido (se cargó por fuera, ej. acondicionadora) ----------
+   Reusa las acciones que ya existen en el backend: crearEgreso ->
+   saltarCargando -> avanzarEgreso. El cupo deja de estar pendiente porque
+   queda referenciado por un egreso, igual que siempre. */
+let cupoParaCeder = null;
+
+function abrirCederCupo(codigoCupo){
+  const cupo = cupos.find(c => c.codigoCupo === codigoCupo);
+  if(!cupo) return;
+  cupoParaCeder = codigoCupo;
+  document.getElementById("cederTitulo").textContent = "Cupo cedido · " + codigoCupo;
+  document.getElementById("cederResumen").innerHTML = `<strong>${cupo.cliente || "—"}</strong> · ${cupo.cereal || "—"} · Corredor: ${cupo.corredor || "—"} · Destino: ${cupo.destino || "—"}`;
+  document.getElementById("cederDestinoNombre").value = "";
+  document.getElementById("cederCartaPorte").value = "";
+  document.getElementById("cederOverlay").classList.add("open");
+}
+
+function closeCederCupo(){
+  document.getElementById("cederOverlay").classList.remove("open");
+  cupoParaCeder = null;
+}
+
+async function confirmarCederCupo(){
+  const codigoCupo = cupoParaCeder;
+  const cupo = cupos.find(c => c.codigoCupo === codigoCupo);
+  if(!cupo) return;
+
+  const nombre = document.getElementById("cederDestinoNombre").value.trim();
+  const cartaPorte = document.getElementById("cederCartaPorte").value.trim();
+  if(!nombre){ alert("Poné a quién se le cedió el cupo."); return; }
+
+  const boton = document.getElementById("cederBtnGuardar");
+  const textoOriginal = boton.textContent;
+  boton.textContent = "Guardando…";
+  boton.disabled = true;
+
+  try{
+    await enviarAccion({
+      accion: "crearEgreso",
+      codigoCupo,
+      cereal: cupo.cereal || "",
+      origen: "Acopio",
+      planta: "Acondicionadora",
+      chofer: "",
+      dominio: "",
+      observaciones: "Cupo cedido a " + nombre,
+    });
+    await cargarDatos(true, true);
+
+    const eg = egresos.find(x => x.codigoCupo === codigoCupo);
+    if(!eg) throw new Error("Se creó el egreso pero no lo encontré para finalizarlo. Revisalo en la lista.");
+
+    await enviarAccion({ accion: "saltarCargando", id: eg.id });
+    await enviarAccion({ accion: "avanzarEgreso", id: eg.id, codigoCupo, cartaPorte });
+    closeCederCupo();
+    await cargarDatos(true, true);
+  }catch(err){
+    alert("No se pudo marcar el cupo como cedido: " + err.message);
+    await cargarDatos(true, true);
+  }finally{
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+  }
 }
 
 /* ---------- Nuevo cupo ---------- */
